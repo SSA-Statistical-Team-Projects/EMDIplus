@@ -194,7 +194,9 @@ ebp <- function(fixed,
                 cpus = 1,
                 custom_indicator = NULL, 
                 na.rm = FALSE,
-                weights = NULL
+                weights = NULL,
+                smp_weights = NULL,
+                pop_weights = NULL
 ) {
 
   ebp_check1(fixed = fixed, pop_data = pop_data, pop_domains = pop_domains,
@@ -233,8 +235,9 @@ ebp <- function(fixed,
                               fixed            = fixed,
                               threshold        = threshold,
                               na.rm            = na.rm,
-                              weights          = weights
-                              )
+                              weights          = weights,
+                              smp_weights      = smp_weights,
+                              pop_weights      = pop_weights,)
 
 
   
@@ -246,7 +249,9 @@ ebp <- function(fixed,
                                   transformation = transformation,
                                   interval       = interval,
                                   L              = L,
-                                  keep_data      = TRUE
+                                  keep_data      = TRUE,
+                                  smp_weights    = smp_weights,
+                                  pop_weights    = pop_weights
                                   )
 
 

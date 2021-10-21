@@ -15,7 +15,8 @@ parametric_bootstrap <- function(framework,
                                  B,
                                  boot_type,
                                  parallel_mode,
-                                 cpus) {
+                                 cpus,
+                                 smp_weight) {
   message('\r', "Bootstrap started                                                                        ")
   if (boot_type == "wild") {
     res_s <- residuals(point_estim$model)
@@ -108,7 +109,8 @@ mse_estim <- function(framework,
                       transformation,
                       interval,
                       L,
-                      boot_type
+                      boot_type,
+                      smp_weight
                       ) {
 
 
@@ -148,8 +150,8 @@ mse_estim <- function(framework,
                             data = unlist(lapply(framework$indicator_list,
                                    function(f, threshold){
                                      matrix(nrow = framework$N_dom_pop,
-                                            data = unlist(tapply(pop_income_vector,
-                                                                 framework$pop_domains_vec, f,
+                                            data = unlist(tapply(c(pop_income_vector,framework$popweight_data),
+                                                                 c(framework$pop_domains_vec,framework$pop_domains_vec), f,
                                                                  threshold = framework$threshold ,
                                                                  simplify = TRUE)
                                                           ),
@@ -193,7 +195,8 @@ mse_estim <- function(framework,
                                                  transformation = transformation,
                                                  interval       = interval,
                                                  L              = L,
-                                                 framework      = framework
+                                                 framework      = framework,
+                                                 smp_weight     = smp_weight
                                                  )[[1]][,-1])
 
   return((bootstrap_point_estim - true_indicators)^2)
@@ -355,7 +358,8 @@ mse_estim_wrapper <-  function(i,
                                fitted_s,
                                start_time,
                                boot_type,
-                               seedvec) {
+                               seedvec,
+                               smp_weight) {
   
   tmp <- mse_estim(framework       = framework,
                    lambda          = lambda,
@@ -368,7 +372,8 @@ mse_estim_wrapper <-  function(i,
                    transformation  = transformation,
                    interval        = interval,
                    L               = L, 
-                   boot_type       = boot_type
+                   boot_type       = boot_type,
+                   smp_weight      = smp_weight
                    )
 
   if (i %% 10 == 0) {

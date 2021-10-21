@@ -14,7 +14,8 @@ point_estim <- function (framework,
                          transformation,
                          interval,
                          L,
-                         keep_data  = FALSE
+                         keep_data  = FALSE,
+                         smp_weight = NULL
 ) {
   
   # Transformation of data -------------------------------------------------------
@@ -38,7 +39,8 @@ point_estim <- function (framework,
   transformation_par <- data_transformation(fixed          = fixed,
                                             smp_data       = framework$smp_data,
                                             transformation = transformation,
-                                            lambda         = optimal_lambda
+                                            lambda         = optimal_lambda,
+                                            smp_weight     = NULL
   )
   shift_par <- transformation_par$shift
   
@@ -48,13 +50,31 @@ point_estim <- function (framework,
   # See Molina and Rao (2010) p. 374
   # lme function is included in the nlme package which is imported.
   
-  mixed_model <- nlme::lme(fixed  = fixed,
-                           data   = transformation_par$transformed_data ,
-                           random = as.formula(paste0("~ 1 | as.factor(", 
-                                                      framework$smp_domains, ")")),
-                           method = "REML",
-                           keep.data = keep_data)
+  if(is.null(smp_weight) == TRUE){
+    
+    mixed_model <- nlme::lme(fixed  = fixed,
+                             data   = transformation_par$transformed_data ,
+                             random = as.formula(paste0("~ 1 | as.factor(", 
+                                                        framework$smp_domains, ")")),
+                             method = "REML",
+                             keep.data = keep_data)
+  } else {
+    
+    mixed_model <- nlme::lme(fixed  = fixed, 
+                             data   = transformation_par$transformed_data ,
+                             random = as.formula(paste0("~ 1 | as.factor(", 
+                                                        framework$smp_domains, ")")),
+                             method = "ML",
+                             control = lmeControl(maxiter=100,opt="nlminb"),
+                             keep.data= keep_data,
+                             weights = varComb(varIdent(as.formula(paste0("~ 1 | as.factor(", 
+                                                                          framework$smp_domains, ")"))),
+                                               varFixed(as.formula(paste0("~1/",smp_weight)))))
+    
+  }
   
+  
+   
   
   # Function model_par extracts the needed parameters theta from the nested
   # error linear regression model. It returns the beta coefficients (betas),
@@ -293,17 +313,27 @@ monte_carlo <- function(transformation,
                                       framework      = framework
     )
     
-    # Calculation of indicators for each Monte Carlo population
+    # # Calculation of indicators for each Monte Carlo population
+    # ests_mcmc[,l,] <- matrix(nrow=framework$N_dom_pop, data = unlist(lapply(
+    #   framework$indicator_list, function(f, threshold){matrix(nrow=framework$N_dom_pop,
+    #                                                           data = unlist(tapply(
+    #                                                             population_vector,
+    #                                                             framework$pop_domains_vec,
+    #                                                             f,
+    #                                                             threshold = framework$threshold,
+    #                                                             simplify = TRUE)),byrow = TRUE)},
+    #   threshold = framework$threshold)))
     ests_mcmc[,l,] <- matrix(nrow=framework$N_dom_pop, data = unlist(lapply(
       framework$indicator_list, function(f, threshold){matrix(nrow=framework$N_dom_pop, 
                                                               data = unlist(tapply(
-                                                                population_vector,
-                                                                framework$pop_domains_vec, 
+                                                                c(population_vector,framework$popweight_data),
+                                                                c(framework$pop_domains_vec,framework$pop_domains_vec), 
                                                                 f, 
                                                                 threshold = framework$threshold,
                                                                 simplify = TRUE)),byrow = TRUE)}, 
       threshold = framework$threshold)))
     
+
   } # End for loop
   
   

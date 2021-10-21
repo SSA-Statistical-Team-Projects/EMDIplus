@@ -7,7 +7,8 @@
 
 
 framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, 
-                     threshold, custom_indicator = NULL, na.rm, weights) {
+                     threshold, custom_indicator = NULL, na.rm, weights, smp_weights = NULL,
+                     pop_weights = NULL) {
 
   # Reduction of number of variables
   mod_vars <- all.vars(fixed)
@@ -32,6 +33,24 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
     stop('EBP does not work with missing values. Set na.rm = TRUE in function 
           ebp.')
   }
+  
+  if (is.null(pop_weight) == TRUE){
+    
+    popweight_data <- rep(1, nrow(pop_data))
+     
+  }
+  
+  popweight_data <- pop_data[,pop_weight]  
+  pop_data <- pop_data[, pop_vars]
+  
+  if(is.null(smp_weight) == TRUE){
+    
+    smpweight_data <- rep(1, nrow(smp_data))
+    
+  }
+  
+  smpweight_data <- smp_data[,smp_weight]
+  smp_data <- smp_data[,c(smp_vars,smp_weight)]
   
   
   # Order of domains
@@ -77,8 +96,8 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
             smp_domains = smp_domains)
 
   indicator_list <- list(
-    fast_mean = function(y, threshold) {t(mean(y))},
-    hcr = function(y, threshold) {t(mean(y < threshold))},
+    fast_mean = function(y, threshold) {t(weighted.mean(y[1:(length(y)/2)],y[(1+length(y)/2):length(y)]))},
+    hcr = function(y, threshold) {t(weighted.mean(y[1:(length(y)/2)] < threshold,y[(1+length(y)/2):length(y)]))},
     pgap = function(y, threshold) {t(mean((y < threshold) * (threshold - y) / threshold))},
     gini = function(y, threshold) {
       n <- length(y)
@@ -146,7 +165,9 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
               indicator_list   = indicator_list,
               indicator_names  = indicator_names,
               threshold        = threshold,
-              weights          = weights
+              weights          = weights,
+              smp_data         = smp_data,
+              pop_data         = pop_data
               )
          )
 }
