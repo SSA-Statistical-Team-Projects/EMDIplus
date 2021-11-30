@@ -313,25 +313,34 @@ monte_carlo <- function(transformation,
                                       framework      = framework
     )
     
-    # # Calculation of indicators for each Monte Carlo population
-    # ests_mcmc[,l,] <- matrix(nrow=framework$N_dom_pop, data = unlist(lapply(
-    #   framework$indicator_list, function(f, threshold){matrix(nrow=framework$N_dom_pop,
-    #                                                           data = unlist(tapply(
-    #                                                             population_vector,
-    #                                                             framework$pop_domains_vec,
-    #                                                             f,
-    #                                                             threshold = framework$threshold,
-    #                                                             simplify = TRUE)),byrow = TRUE)},
-    #   threshold = framework$threshold)))
-    ests_mcmc[,l,] <- matrix(nrow=framework$N_dom_pop, data = unlist(lapply(
-      framework$indicator_list, function(f, threshold){matrix(nrow=framework$N_dom_pop, 
-                                                              data = unlist(tapply(
-                                                                c(population_vector,framework$popweight_data),
-                                                                c(framework$pop_domains_vec,framework$pop_domains_vec), 
-                                                                f, 
-                                                                threshold = framework$threshold,
-                                                                simplify = TRUE)),byrow = TRUE)}, 
-      threshold = framework$threshold)))
+    # Calculation of indicators for each Monte Carlo population
+    if (is.null(framework$weights) & is.null(framework$popweight_data)) {
+      ests_mcmc[,l,] <- matrix(nrow=framework$N_dom_pop, data = unlist(lapply(
+        framework$indicator_list, function(f, threshold){matrix(nrow=framework$N_dom_pop,
+                                                                data = unlist(tapply(
+                                                                  population_vector,
+                                                                  framework$pop_domains_vec,
+                                                                  f,
+                                                                  threshold = framework$threshold,
+                                                                  simplify = TRUE)),byrow = TRUE)},
+        threshold = framework$threshold)))
+      
+    } else {
+      
+      if(is.null(framework$popweight_data)) framework$popweight_data <- rep(1, length(framework$pop_domains_vec))
+          
+      ests_mcmc[,l,] <- matrix(nrow=framework$N_dom_pop, data = unlist(lapply(
+        framework$indicator_list, function(f, threshold){matrix(nrow=framework$N_dom_pop, 
+                                                                data = unlist(tapply(
+                                                                  c(population_vector,framework$popweight_data),
+                                                                  c(rep(framework$pop_domains_vec, 2)), 
+                                                                  f, 
+                                                                  threshold = framework$threshold,
+                                                                  simplify = TRUE)),byrow = TRUE)}, 
+        threshold = framework$threshold)))
+      
+    }
+    
     
 
   } # End for loop

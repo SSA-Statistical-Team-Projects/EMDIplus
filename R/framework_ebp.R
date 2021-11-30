@@ -34,23 +34,23 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
           ebp.')
   }
   
-  if (is.null(pop_weight) == TRUE){
+  if (is.null(pop_weights) == TRUE){
     
     popweight_data <- rep(1, nrow(pop_data))
      
   }
   
-  popweight_data <- pop_data[,pop_weight]  
+  popweight_data <- pop_data[,pop_weights]  
   pop_data <- pop_data[, pop_vars]
   
-  if(is.null(smp_weight) == TRUE){
+  if(is.null(smp_weights) == TRUE){
     
     smpweight_data <- rep(1, nrow(smp_data))
     
   }
   
-  smpweight_data <- smp_data[,smp_weight]
-  smp_data <- smp_data[,c(smp_vars,smp_weight)]
+  smpweight_data <- smp_data[,smp_weights]
+  smp_data <- smp_data[,c(smp_vars,smp_weights)]
   
   
   # Order of domains

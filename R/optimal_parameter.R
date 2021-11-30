@@ -7,7 +7,9 @@ optimal_parameter <- function(generic_opt,
                               interval) {
 
   if(transformation != "no" &&
-     transformation != "log") {
+     transformation != "log" &&
+     transformation != "arcsin" &&
+     transformation != "ordernorm") {
     # no lambda -> no estimation -> no optmimization
     
     if (transformation == 'box.cox' & any(interval == 'default')) {

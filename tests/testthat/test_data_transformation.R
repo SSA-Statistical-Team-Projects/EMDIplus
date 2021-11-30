@@ -44,7 +44,15 @@ test_that("Test that transformed_data is data_frame", {
   expect_equal(class(std_data_transformation(income~educ1, incomedata, lambda=1,
                                              transformation="log.shift")),
                "data.frame")
-
+  
+  expect_equal(class(data_transformation(income~educ1, smp_data=incomedata, lambda=1,
+                                         transformation="arcsin")$transformed_data),
+               "data.frame")
+  
+  expect_equal(class(std_data_transformation(income~educ1, incomedata, lambda=1,
+                                             transformation="arcsin")),
+               "data.frame")
+  
 })
 
 

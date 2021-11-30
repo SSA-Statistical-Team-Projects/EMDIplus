@@ -57,9 +57,9 @@ ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B,
   }
   if (is.null(transformation) || !(transformation == "box.cox" 
         || transformation == "log" || transformation == "dual" || transformation == "log.shift"
-        || transformation == "no")) {
+        || transformation == "no" || transformation == "arcsin" || transformation == "ordernorm")) {
     stop("The five options for transformation are ''no'', ''log'', ''box.cox'', 
-         ''dual'' or ''log.shift''." )
+         ''dual'' or ''log.shift'' or ''arcsin'' or ''ordernorm''." )
   }
   if (any(interval != 'default') & (!is.vector(interval, mode = "numeric") || 
       length(interval) != 2 || !(interval[1] < interval[2]))) {

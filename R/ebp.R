@@ -237,7 +237,7 @@ ebp <- function(fixed,
                               na.rm            = na.rm,
                               weights          = weights,
                               smp_weights      = smp_weights,
-                              pop_weights      = pop_weights,)
+                              pop_weights      = pop_weights)
 
 
   

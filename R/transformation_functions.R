@@ -76,6 +76,10 @@ data_transformation <- function(fixed,
     dual(y = y_vector, lambda = lambda, shift = 0)
   } else if (transformation == "log.shift") {
     log_shift_opt(y = y_vector, lambda = lambda, shift = NULL)
+  } else if (transformation == "arcsin") {
+    arcsin_transform(y = y_vector, shift = NULL)
+  } else if (transformation == "ordernorm") {
+    ordernorm_transform(y = y_vector, shift = NULL)
   }
 
   smp_data[paste(fixed[2])] <- transformed$y
@@ -106,7 +110,12 @@ std_data_transformation <- function(fixed=fixed,
       smp_data[paste(fixed[2])]
     } else if (transformation == "no") {
       smp_data[paste(fixed[2])]
-    } 
+    } else if (transformation == "arcsin") {
+      smp_data[paste(fixed[2])]
+    } else if (transformaiton == "ordernorm") {
+      smp_data[paste(fixed[2])]
+    }
+  
   
   smp_data[paste(fixed[2])] <- std_transformed
   return(transformed_data = smp_data)
@@ -126,7 +135,12 @@ back_transformation <- function(y, transformation, lambda, shift) {
     dual_back(y = y, lambda = lambda, shift = shift)
   } else if (transformation == "log.shift") {
     log_shift_opt_back(y = y, lambda = lambda)
+  } else if (transformation == "arcsin") {
+    arcsin_transform_back(y = y, shift = shift)
+  } else if (transformation == "ordernorm") {
+    ordernorm_transform_back(y = y, shift = shift)
   }
+  
   
   return(y = back_transformed)
 } # End back_transform
@@ -146,6 +160,60 @@ no_transform <- function(y, shift = NULL) {
 no_transform_back <- function(y) {
   return(y = y)
 }
+
+# Arcsin transformation 
+arcsin_transform <- function(y, shift = NULL) {
+  y <- asin(sqrt(y))
+  return(list(y = y, shift=NULL))
+}
+
+arcsin_transform_back <- function(y, shift = NULL) {
+  y <- sin(y)^2
+  return(y = y)
+}
+
+# Order Norm 
+ordernorm_transform <- function(y, shift = NULL) {
+  y <- ordernorm(y)$x.t
+  return(list(y = y, shift = NULL))
+}
+
+ordernorm_transform_back <- function(y, shift = NULL){
+  
+  x_t <- y
+  #old_points <- orderNorm_obj$x
+  vals <- suppressWarnings(
+    approx(x_t, old_points, xout = new_points_x_t, rule = 1)
+  )
+  
+  # If predictions have been made outside observed domain
+  if (any(is.na(vals$y))) {
+    if(warn) warning('Transformations requested outside observed domain; logit approx. on ranks applied')
+    
+    fit <- orderNorm_obj$fit
+    p <- qnorm(fitted(fit, type = "response"))
+    l_idx <- vals$x < min(x_t, na.rm = TRUE)
+    h_idx <- vals$x > max(x_t, na.rm = TRUE)
+    
+    # Check 
+    if (any(l_idx)) {
+      # Solve algebraically from original transformation
+      logits <- log(pnorm(vals$x[l_idx] + min(p, na.rm = TRUE) - min(x_t, na.rm = TRUE)) / 
+                      (1 - pnorm(vals$x[l_idx] + min(p, na.rm = TRUE) - min(x_t, na.rm = TRUE))))
+      vals$y[l_idx] <- 
+        unname((logits - fit$coef[1]) / fit$coef[2])
+    }
+    if (any(h_idx)) {
+      logits <- log(pnorm(vals$x[h_idx] + max(p, na.rm = TRUE) - max(x_t, na.rm = TRUE)) / 
+                      (1 - pnorm(vals$x[h_idx] + max(p, na.rm = TRUE) - max(x_t, na.rm = TRUE))))
+      vals$y[h_idx] <- 
+        unname((logits - fit$coef[1]) / fit$coef[2])
+    }
+  }
+  
+  vals$y
+}
+
 
 # Log transformation -----------------------------------------------------------
 
