@@ -22,7 +22,9 @@ ebp(
   cpus = 1,
   custom_indicator = NULL,
   na.rm = FALSE,
-  weights = NULL
+  weights = NULL,
+  smp_weights = NULL,
+  pop_weights = NULL
 )
 }
 \arguments{

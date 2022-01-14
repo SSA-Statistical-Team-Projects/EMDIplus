@@ -6,6 +6,9 @@ load("EBP/incomedata.RData")
 load("EBP/incomedata_woTeruel.RData")
 load("EBP/Xoutsamp_AuxVar.RData")
 
+# create transformed data that will work for arcsin and ordernorm transformations'
+incomedata$income_trans <- runif(nrow(incomedata))
+
 
 # Test if return is a data.frame
 test_that("Test that transformed_data is data_frame", {
@@ -45,12 +48,20 @@ test_that("Test that transformed_data is data_frame", {
                                              transformation="log.shift")),
                "data.frame")
   
-  expect_equal(class(data_transformation(income~educ1, smp_data=incomedata, lambda=1,
+  expect_equal(class(data_transformation(income_trans~educ1, smp_data=incomedata, lambda=1,
                                          transformation="arcsin")$transformed_data),
                "data.frame")
   
-  expect_equal(class(std_data_transformation(income~educ1, incomedata, lambda=1,
+  expect_equal(class(std_data_transformation(income_trans~educ1, incomedata, lambda=1,
                                              transformation="arcsin")),
+               "data.frame")
+  
+  expect_equal(class(data_transformation(income_trans~educ1, smp_data=incomedata, lambda=1,
+                                         transformation="ordernorm")$transformed_data),
+               "data.frame")
+
+  expect_equal(class(std_data_transformation(income_trans~educ1, incomedata, lambda=1,
+                                             transformation="ordernorm")),
                "data.frame")
   
 })

@@ -56,6 +56,8 @@
 #' transform_data <- data_transformation(eqIncome ~ gender + eqsize + cash + 
 #' self_empl + unempl_ben + age_ben + surv_ben + sick_ben + dis_ben + rent + 
 #' fam_allow + house_allow + cap_inv + tax_adj, eusilcA_smp, "box.cox", 0.7)
+#' 
+#' @importFrom bestNormalize orderNorm
 #' @export
 
 
@@ -112,7 +114,7 @@ std_data_transformation <- function(fixed=fixed,
       smp_data[paste(fixed[2])]
     } else if (transformation == "arcsin") {
       smp_data[paste(fixed[2])]
-    } else if (transformaiton == "ordernorm") {
+    } else if (transformation == "ordernorm") {
       smp_data[paste(fixed[2])]
     }
   
@@ -174,7 +176,7 @@ arcsin_transform_back <- function(y, shift = NULL) {
 
 # Order Norm 
 ordernorm_transform <- function(y, shift = NULL) {
-  y <- ordernorm(y)$x.t
+  y <- orderNorm(unlist(y))$x.t
   return(list(y = y, shift = NULL))
 }
 

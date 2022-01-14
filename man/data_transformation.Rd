@@ -59,6 +59,7 @@ data("eusilcA_smp")
 transform_data <- data_transformation(eqIncome ~ gender + eqsize + cash + 
 self_empl + unempl_ben + age_ben + surv_ben + sick_ben + dis_ben + rent + 
 fam_allow + house_allow + cap_inv + tax_adj, eusilcA_smp, "box.cox", 0.7)
+
 }
 \seealso{
 \code{\link[nlme]{lme}}
