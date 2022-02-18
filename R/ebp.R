@@ -195,7 +195,6 @@ ebp <- function(fixed,
                 custom_indicator = NULL, 
                 na.rm = FALSE,
                 weights = NULL,
-                smp_weights = NULL,
                 pop_weights = NULL
 ) {
 
@@ -236,7 +235,6 @@ ebp <- function(fixed,
                               threshold        = threshold,
                               na.rm            = na.rm,
                               weights          = weights,
-                              smp_weights      = smp_weights,
                               pop_weights      = pop_weights)
 
 
@@ -245,14 +243,14 @@ ebp <- function(fixed,
   # browser()
   # The function point_estim can be found in script point_estimation.R
   point_estim <- point_estim(framework      = framework,
-                                  fixed          = fixed,
-                                  transformation = transformation,
-                                  interval       = interval,
-                                  L              = L,
-                                  keep_data      = TRUE,
-                                  smp_weights    = smp_weights,
-                                  pop_weights    = pop_weights
-                                  )
+                             fixed          = fixed,
+                             transformation = transformation,
+                             interval       = interval,
+                             L              = L,
+                             keep_data      = TRUE,
+                             weights        = weights,
+                             pop_weights    = pop_weights
+                             )
 
 
 

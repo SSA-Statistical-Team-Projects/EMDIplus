@@ -6,6 +6,9 @@ load("EBP/incomedata.RData")
 load("EBP/incomedata_woTeruel.RData")
 load("EBP/Xoutsamp_AuxVar.RData")
 
+## generate fake smp and pop weights
+incomedata$smp_weights <- incomedata$weight * incomedata$income_trans
+Xoutsamp_AuxVar$population <- 10*abs(rnorm(nrow(Xoutsamp_AuxVar)))
 
 
 test_that("Does monte_carlo function give benchmark results?", {

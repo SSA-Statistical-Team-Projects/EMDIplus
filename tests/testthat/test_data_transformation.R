@@ -6,9 +6,6 @@ load("EBP/incomedata.RData")
 load("EBP/incomedata_woTeruel.RData")
 load("EBP/Xoutsamp_AuxVar.RData")
 
-# create transformed data that will work for arcsin and ordernorm transformations'
-incomedata$income_trans <- runif(nrow(incomedata))
-
 
 # Test if return is a data.frame
 test_that("Test that transformed_data is data_frame", {
@@ -228,6 +225,13 @@ test_that("Does back transformation gives sample value?", {
                                        lambda=lambda,
                                        shift=NULL)
   expect_equal(back_trans_logshift, incomedata$income)
+  
+  back_trans_ordernorm <- back_transformation(y_orig = incomedata$income,
+                                              y = incomedata$income_trans,
+                                              transformation = "ordernorm",
+                                              lambda = lambda,
+                                              shift = NULL)
+  expect_equal(back_trans_ordernorm$y, incomedata$incomeonbacktrans)
 
 })
 

@@ -1,3 +1,7 @@
+# emdiplus 1.0.0
+* Creating a new weighting system for sampling and population weights as alternatives to the standard EMDI package
+weighting system.
+
 # emdi 2.1.0
 * Extension of the ebp function to allow informative sampling
 * Additional data-driven transformations for the ebp 

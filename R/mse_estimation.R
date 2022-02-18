@@ -16,7 +16,8 @@ parametric_bootstrap <- function(framework,
                                  boot_type,
                                  parallel_mode,
                                  cpus,
-                                 smp_weight) {
+                                 weights,
+                                 pop_weights) {
   message('\r', "Bootstrap started                                                                        ")
   if (boot_type == "wild") {
     res_s <- residuals(point_estim$model)
@@ -54,7 +55,9 @@ parametric_bootstrap <- function(framework,
                                    res_s           = res_s,
                                    fitted_s        = fitted_s,
                                    start_time      = start_time,
-                                   boot_type       = boot_type
+                                   boot_type       = boot_type,
+                                   weights         = weights,
+                                   pop_weights     = pop_weights
                   )
             )
     parallelMap::parallelStop()
@@ -74,7 +77,9 @@ parametric_bootstrap <- function(framework,
                                             res_s           = res_s,
                                             fitted_s        = fitted_s,
                                             start_time      = start_time,
-                                            boot_type       = boot_type
+                                            boot_type       = boot_type,
+                                            weights         = weights,
+                                            pop_weights     = pop_weights
         )
       )
   }
@@ -110,7 +115,8 @@ mse_estim <- function(framework,
                       interval,
                       L,
                       boot_type,
-                      smp_weight
+                      weights,
+                      pop_weights
                       ) {
 
 
@@ -127,7 +133,8 @@ mse_estim <- function(framework,
                                       shift          = shift, 
                                       transformation = transformation,
                                       res_s          = res_s,
-                                      fitted_s       = fitted_s
+                                      fitted_s       = fitted_s,
+                                      fixed          = fixed
     )
   }
   else {
@@ -136,7 +143,8 @@ mse_estim <- function(framework,
                                 gen_model      = gen_model,
                                 lambda         = lambda,
                                 shift          = shift, 
-                                transformation = transformation
+                                transformation = transformation,
+                                fixed          = fixed
                                )
   }
   pop_income_vector <- superpop$pop_income_vector
@@ -146,20 +154,46 @@ mse_estim <- function(framework,
       framework$threshold(y = pop_income_vector)
   }
   # True indicator values
-  true_indicators <- matrix(nrow = framework$N_dom_pop,
-                            data = unlist(lapply(framework$indicator_list,
-                                   function(f, threshold){
-                                     matrix(nrow = framework$N_dom_pop,
-                                            data = unlist(tapply(c(pop_income_vector,framework$popweight_data),
-                                                                 c(framework$pop_domains_vec,framework$pop_domains_vec), f,
-                                                                 threshold = framework$threshold ,
-                                                                 simplify = TRUE)
-                                                          ),
-                                            byrow = TRUE)
-                                     },
-                                   threshold = framework$threshold)
-                                   )
-                            )
+  if (is.null(framework$weights) == FALSE & is.null(framework$pop_weights) == TRUE){
+    
+    true_indicators <- matrix(nrow = framework$N_dom_pop,
+                              data = unlist(lapply(framework$indicator_list,
+                                                   function(f, threshold){
+                                                     matrix(nrow = framework$N_dom_pop,
+                                                            data = unlist(tapply(pop_income_vector,
+                                                                                 framework$pop_domains_vec, f,
+                                                                                 threshold = framework$threshold ,
+                                                                                 simplify = TRUE)
+                                                            ),
+                                                            byrow = TRUE)
+                                                   },
+                                                   threshold = framework$threshold)
+                              )
+    )
+    
+  } else {
+    
+    true_indicators <- matrix(nrow = framework$N_dom_pop,
+                              data = unlist(lapply(framework$indicator_list,
+                                                   function(f, threshold){
+                                                     matrix(nrow = framework$N_dom_pop,
+                                                            data = unlist(tapply(c(pop_income_vector,
+                                                                                   framework$pop_data[,framework$pop_weights]),
+                                                                                 c(framework$pop_domains_vec,
+                                                                                   framework$pop_domains_vec), f,
+                                                                                 threshold = framework$threshold ,
+                                                                                 simplify = TRUE)
+                                                            ),
+                                                            byrow = TRUE)
+                                                   },
+                                                   threshold = framework$threshold)
+                              )
+    )
+    
+    
+  }
+  
+  
 
     colnames(true_indicators) <- framework$indicator_names
 
@@ -196,7 +230,8 @@ mse_estim <- function(framework,
                                                  interval       = interval,
                                                  L              = L,
                                                  framework      = framework,
-                                                 smp_weight     = smp_weight
+                                                 weights         = weights,
+                                                 pop_weights     = pop_weights
                                                  )[[1]][,-1])
 
   return((bootstrap_point_estim - true_indicators)^2)
@@ -208,7 +243,7 @@ mse_estim <- function(framework,
 # The model parameter from the nested error linear regression model are
 # used to contruct a superpopulation model.
 superpopulation_wild <-  function(framework, model_par, gen_model, lambda, shift, 
-                             transformation, res_s,  fitted_s) {
+                             transformation, res_s,  fitted_s, fixed) {
   # rescaling the errors
   res_s <- sqrt(model_par$sigmae2est) * (res_s - mean(res_s))/sd(res_s)
   
@@ -234,7 +269,9 @@ superpopulation_wild <-  function(framework, model_par, gen_model, lambda, shift
   Y_pop_b <- back_transformation(y              = Y_pop_b,
                                  transformation = transformation,
                                  lambda         = lambda,
-                                 shift          = shift
+                                 shift          = shift,
+                                 framework      = framework,
+                                 fixed          = fixed
   )
   Y_pop_b[!is.finite(Y_pop_b)] <- 0
   
@@ -242,7 +279,7 @@ superpopulation_wild <-  function(framework, model_par, gen_model, lambda, shift
 }
 
 superpopulation <-  function(framework, model_par, gen_model, lambda, shift, 
-                             transformation) {
+                             transformation, fixed) {
   # superpopulation individual errors
   eps <- vector(length = framework$N_pop)
   eps[framework$obs_dom]  <-  rnorm(sum(framework$obs_dom),
@@ -260,7 +297,9 @@ superpopulation <-  function(framework, model_par, gen_model, lambda, shift,
   Y_pop_b <- back_transformation(y             = Y_pop_b,
                                  transformation = transformation,
                                  lambda         = lambda,
-                                 shift          = shift
+                                 shift          = shift,
+                                 framework      = framework,
+                                 fixed          = fixed
   )
   Y_pop_b[!is.finite(Y_pop_b)] <- 0
   
@@ -290,7 +329,9 @@ bootstrap_par <- function(fixed,
   Y_smp_b <- back_transformation(y              = Y_smp_b,
                                  transformation = transformation,
                                  lambda         = lambda,
-                                 shift          = shift
+                                 shift          = shift,
+                                 framework      = framework,
+                                 fixed          = fixed
   )
   Y_smp_b[!is.finite(Y_smp_b)] <- 0
   
@@ -330,7 +371,9 @@ bootstrap_par_wild <- function(
   Y_smp_b <- back_transformation(y              = Y_smp_b,
                                  transformation = transformation,
                                  lambda         = lambda,
-                                 shift          = shift
+                                 shift          = shift,
+                                 framework      = framework,
+                                 fixed          = fixed
   )
   Y_smp_b[!is.finite(Y_smp_b)] <- 0
   
@@ -359,7 +402,8 @@ mse_estim_wrapper <-  function(i,
                                start_time,
                                boot_type,
                                seedvec,
-                               smp_weight) {
+                               weights,
+                               pop_weights) {
   
   tmp <- mse_estim(framework       = framework,
                    lambda          = lambda,
@@ -373,7 +417,8 @@ mse_estim_wrapper <-  function(i,
                    interval        = interval,
                    L               = L, 
                    boot_type       = boot_type,
-                   smp_weight      = smp_weight
+                   weights         = weights,
+                   pop_weights     = pop_weights
                    )
 
   if (i %% 10 == 0) {

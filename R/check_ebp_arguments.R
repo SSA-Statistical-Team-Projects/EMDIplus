@@ -124,9 +124,10 @@ ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B,
          specifying the variable name of a numeric variable 
          indicating weights in the sample data. See also help(ebp).')
   }
-  if(!is.null(weights) && !(transformation == "log"|| transformation == "no")) {
-    stop("Weighted ebp can only be used without transformation or the log-
-    transformation")
+  if(!is.null(weights) && !(transformation == "log"|| transformation == "no" || 
+                            transformation == "ordernorm" || transformation == "arcsin")) {
+    stop("Weighted ebp can only be used without transformation, the log-
+    transformation, ordernorm or arcsin tranformations")
   }
   if(!is.null(weights) && isTRUE(MSE) && boot_type == "wild") {
     stop("The weighted version of ebp is only available with the ''parametric'' 

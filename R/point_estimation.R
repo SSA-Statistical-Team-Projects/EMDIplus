@@ -8,6 +8,8 @@
 # additional estimation steps are taken in order to calculate weighted regression
 # coefficients before the monte-carlo approximation. See corresponding functions below.
 
+#' @import nlme
+
 
 point_estim <- function (framework,
                          fixed,
@@ -15,7 +17,9 @@ point_estim <- function (framework,
                          interval,
                          L,
                          keep_data  = FALSE,
-                         smp_weight = NULL
+                         weights        = weights,
+                         pop_weights    = pop_weights
+                         
 ) {
   
   # Transformation of data -------------------------------------------------------
@@ -39,8 +43,7 @@ point_estim <- function (framework,
   transformation_par <- data_transformation(fixed          = fixed,
                                             smp_data       = framework$smp_data,
                                             transformation = transformation,
-                                            lambda         = optimal_lambda,
-                                            smp_weight     = NULL
+                                            lambda         = optimal_lambda
   )
   shift_par <- transformation_par$shift
   
@@ -50,7 +53,7 @@ point_estim <- function (framework,
   # See Molina and Rao (2010) p. 374
   # lme function is included in the nlme package which is imported.
   
-  if(is.null(smp_weight) == TRUE){
+  if(is.null(framework$weights) == FALSE & is.null(framework$pop_weights) == TRUE){
     
     mixed_model <- nlme::lme(fixed  = fixed,
                              data   = transformation_par$transformed_data ,
@@ -59,18 +62,18 @@ point_estim <- function (framework,
                              method = "REML",
                              keep.data = keep_data)
   } else {
-    
+
     mixed_model <- nlme::lme(fixed  = fixed, 
                              data   = transformation_par$transformed_data ,
                              random = as.formula(paste0("~ 1 | as.factor(", 
                                                         framework$smp_domains, ")")),
                              method = "ML",
-                             control = lmeControl(maxiter=100,opt="nlminb"),
+                             control = nlme::lmeControl(maxiter=100,opt="nlminb"),
                              keep.data= keep_data,
                              weights = varComb(varIdent(as.formula(paste0("~ 1 | as.factor(", 
                                                                           framework$smp_domains, ")"))),
-                                               varFixed(as.formula(paste0("~1/",smp_weight)))))
-    
+                                               varFixed(as.formula(paste0("~1/", 
+                                                                          framework$weights)))))
   }
   
   
@@ -107,7 +110,8 @@ point_estim <- function (framework,
                                       lambda         = optimal_lambda,
                                       shift          = shift_par,
                                       model_par      = est_par,
-                                      gen_model      = gen_par
+                                      gen_model      = gen_par,
+                                      fixed          = fixed
   )
   
   mixed_model$coefficients_weighted <- if(!is.null(framework$weights)) {
@@ -286,7 +290,8 @@ monte_carlo <- function(transformation,
                         lambda,
                         shift,
                         model_par,
-                        gen_model) {
+                        gen_model,
+                        fixed) {
   
   # Preparing matrices for indicators for the Monte-Carlo simulation
   #   quant10s = quant25s = mediane = quant75s = quant90s = ginis = qsrs = pgaps =
@@ -310,11 +315,12 @@ monte_carlo <- function(transformation,
                                       shift          = shift,
                                       gen_model      = gen_model,
                                       errors_gen     = errors,
-                                      framework      = framework
-    )
+                                      framework      = framework,
+                                      fixed          = fixed)
+    
     
     # Calculation of indicators for each Monte Carlo population
-    if (is.null(framework$weights) & is.null(framework$popweight_data)) {
+    if (is.null(framework$pop_weights)) {
       ests_mcmc[,l,] <- matrix(nrow=framework$N_dom_pop, data = unlist(lapply(
         framework$indicator_list, function(f, threshold){matrix(nrow=framework$N_dom_pop,
                                                                 data = unlist(tapply(
@@ -327,20 +333,25 @@ monte_carlo <- function(transformation,
       
     } else {
       
-      if(is.null(framework$popweight_data)) framework$popweight_data <- rep(1, length(framework$pop_domains_vec))
+      if(is.null(framework$pop_weights) == FALSE) {
+        
+        framework$pop_data[,framework$pop_weights] <- rep(1, length(framework$pop_domains_vec))
+        
+      }
           
       ests_mcmc[,l,] <- matrix(nrow=framework$N_dom_pop, data = unlist(lapply(
         framework$indicator_list, function(f, threshold){matrix(nrow=framework$N_dom_pop, 
                                                                 data = unlist(tapply(
-                                                                  c(population_vector,framework$popweight_data),
-                                                                  c(rep(framework$pop_domains_vec, 2)), 
+                                                                  c(population_vector,
+                                                                    framework$pop_data[,framework$pop_weights]),
+                                                                  c(framework$pop_domains_vec,
+                                                                    framework$pop_domains_vec), 
                                                                   f, 
                                                                   threshold = framework$threshold,
                                                                   simplify = TRUE)),byrow = TRUE)}, 
         threshold = framework$threshold)))
       
     }
-    
     
 
   } # End for loop
@@ -392,7 +403,8 @@ prediction_y <- function(transformation,
                          shift,
                          gen_model,
                          errors_gen,
-                         framework) {
+                         framework,
+                         fixed) {
   
   # predicted population income vector
   y_pred <- gen_model$mu + errors_gen$epsilon + errors_gen$vu
@@ -401,8 +413,9 @@ prediction_y <- function(transformation,
   y_pred <- back_transformation(y              = y_pred,
                                 transformation = transformation,
                                 lambda         = lambda,
-                                shift          = shift
-  )
+                                shift          = shift,
+                                framework      = framework,
+                                fixed          = fixed)
   y_pred[!is.finite(y_pred)] <- 0
   
   return(y_pred)

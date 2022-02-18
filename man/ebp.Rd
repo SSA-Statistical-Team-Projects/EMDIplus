@@ -24,7 +24,8 @@ ebp(
   na.rm = FALSE,
   weights = NULL,
   smp_weights = NULL,
-  pop_weights = NULL
+  pop_weights = NULL,
+  ...
 )
 }
 \arguments{
