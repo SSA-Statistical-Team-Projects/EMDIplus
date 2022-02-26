@@ -53,7 +53,7 @@ point_estim <- function (framework,
   # See Molina and Rao (2010) p. 374
   # lme function is included in the nlme package which is imported.
   
-  if(is.null(framework$weights) == FALSE & is.null(framework$pop_weights) == TRUE){
+  if(is.null(framework$weights) == TRUE & is.null(framework$pop_weights) == TRUE){
     
     mixed_model <- nlme::lme(fixed  = fixed,
                              data   = transformation_par$transformed_data ,
@@ -114,12 +114,12 @@ point_estim <- function (framework,
                                       fixed          = fixed
   )
   
-  mixed_model$coefficients_weighted <- if(!is.null(framework$weights)) {
-    as.numeric(est_par$betas)
-  } else {NULL}
-  names(mixed_model$coefficients_weighted) <-if(!is.null(framework$weights)) {
-    rownames(est_par$betas)
-  } else {NULL}
+  # mixed_model$coefficients_weighted <- if(!is.null(framework$weights)) {
+  #   as.numeric(est_par$betas)
+  # } else {NULL}
+  # names(mixed_model$coefficients_weighted) <-if(!is.null(framework$weights)) {
+  #   rownames(est_par$betas)
+  # } else {NULL}
   return(list(ind            = indicator_prediction,
               optimal_lambda = optimal_lambda,
               shift_par      = shift_par,
@@ -420,5 +420,17 @@ prediction_y <- function(transformation,
   
   return(y_pred)
 } # End prediction_y
+
+
+##### A simple scaling function with different methods for transforming weights
+scaler <- function(x){
+  
+  average_x <- mean(x, na.rm = TRUE)
+  
+  y <- x / average_x
+  
+  return(y)
+  
+}
 
 

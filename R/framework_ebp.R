@@ -8,7 +8,7 @@
 
 framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, 
                      threshold, custom_indicator = NULL, na.rm, weights = NULL,
-                     pop_weights = NULL) {
+                     pop_weights = NULL, rescale_weights, rescale_popweights) {
 
   # Reduction of number of variables
   mod_vars <- all.vars(fixed)
@@ -42,6 +42,17 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
     
   }
   
+  # Rescale the weights
+  if(rescale_weights == TRUE){
+    
+    smp_data[,weights] <- scaler(smp_data[,weights])
+    
+  }
+  
+  if(rescale_popweights == TRUE){
+    
+    pop_data[,pop_weights] <- scaler(pop_data[,pop_weights])
+  }
   
   # Order of domains
   pop_data <- pop_data[order(pop_data[[pop_domains]]),]

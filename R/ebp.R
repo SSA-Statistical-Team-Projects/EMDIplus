@@ -90,6 +90,12 @@
 #' indicates weights in the sample data. If a character string is provided
 #' a weighted version of the ebp will be used.The variable has to be numeric. 
 #' Defaults to \code{NULL}.
+#' @param pop_weights a character string containing the name of a variable that indicates 
+#' population weights in the sample data
+#' @param rescale_weights a logical, if FALSE, the sample weights do not change. When TRUE (default),
+#' the sample weights are rescaled such that the average weight is 1. 
+#' @param rescale_popweights a logical, if FALSE (default), the sample weights do not change. When TRUE,
+#' the sample weights are rescaled such that the average weight is 1.
 #' @return An object of class "ebp", "emdi" that provides estimators for regional
 #' disaggregated indicators and optionally corresponding MSE estimates. Several 
 #' generic functions have methods for the 
@@ -195,7 +201,9 @@ ebp <- function(fixed,
                 custom_indicator = NULL, 
                 na.rm = FALSE,
                 weights = NULL,
-                pop_weights = NULL
+                pop_weights = NULL,
+                rescale_weights = TRUE,
+                rescale_popweights = FALSE
 ) {
 
   ebp_check1(fixed = fixed, pop_data = pop_data, pop_domains = pop_domains,
@@ -224,18 +232,21 @@ ebp <- function(fixed,
       set.seed(seed)
     }
   }
-    
+  
+  
   # The function framework_ebp can be found in script framework_ebp.R
-  framework <- framework_ebp( pop_data         = pop_data,
-                              pop_domains      = pop_domains,
-                              smp_data         = smp_data,
-                              smp_domains      = smp_domains,
-                              custom_indicator = custom_indicator,
-                              fixed            = fixed,
-                              threshold        = threshold,
-                              na.rm            = na.rm,
-                              weights          = weights,
-                              pop_weights      = pop_weights)
+  framework <- framework_ebp( pop_data           = pop_data,
+                              pop_domains        = pop_domains,
+                              smp_data           = smp_data,
+                              smp_domains        = smp_domains,
+                              custom_indicator   = custom_indicator,
+                              fixed              = fixed,
+                              threshold          = threshold,
+                              na.rm              = na.rm,
+                              weights            = weights,
+                              pop_weights        = pop_weights,
+                              rescale_weights    = rescale_weights,
+                              rescale_popweights = rescale_popweights)
 
 
   
