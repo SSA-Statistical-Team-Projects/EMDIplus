@@ -23,9 +23,9 @@ ebp(
   custom_indicator = NULL,
   na.rm = FALSE,
   weights = NULL,
-  smp_weights = NULL,
   pop_weights = NULL,
-  ...
+  rescale_weights = TRUE,
+  rescale_popweights = FALSE
 )
 }
 \arguments{
@@ -122,6 +122,15 @@ are required. Defaults to \code{FALSE}.}
 indicates weights in the sample data. If a character string is provided
 a weighted version of the ebp will be used.The variable has to be numeric. 
 Defaults to \code{NULL}.}
+
+\item{pop_weights}{a character string containing the name of a variable that indicates 
+population weights in the sample data}
+
+\item{rescale_weights}{a logical, if FALSE, the sample weights do not change. When TRUE (default),
+the sample weights are rescaled such that the average weight is 1.}
+
+\item{rescale_popweights}{a logical, if FALSE (default), the sample weights do not change. When TRUE,
+the sample weights are rescaled such that the average weight is 1.}
 }
 \value{
 An object of class "ebp", "emdi" that provides estimators for regional
