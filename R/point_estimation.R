@@ -16,9 +16,9 @@ point_estim <- function (framework,
                          transformation,
                          interval,
                          L,
-                         keep_data  = FALSE,
+                         keep_data      = FALSE,
                          weights        = weights,
-                         pop_weights    = pop_weights
+                         pop_weights    = pop_weights 
                          
 ) {
   
@@ -53,7 +53,7 @@ point_estim <- function (framework,
   # See Molina and Rao (2010) p. 374
   # lme function is included in the nlme package which is imported.
   
-  if(is.null(framework$weights) == TRUE & is.null(framework$pop_weights) == TRUE){
+  if(is.null(framework$weights) == TRUE){
     
     mixed_model <- nlme::lme(fixed  = fixed,
                              data   = transformation_par$transformed_data ,
@@ -83,18 +83,18 @@ point_estim <- function (framework,
   # error linear regression model. It returns the beta coefficients (betas),
   # sigmae2est, sigmau2est and the random effect (rand_eff).
   
-  est_par <- model_par(mixed_model = mixed_model,
-                       framework   = framework,
-                       fixed       = fixed,
+  est_par <- model_par(mixed_model        = mixed_model,
+                       framework          = framework,
+                       fixed              = fixed,
                        transformation_par = transformation_par
   )
   
   # Function gen_model calculates the parameters in the generating model.
   # See Molina and Rao (2010) p. 375 (20)
   # The function returns sigmav2est and the constant part mu.
-  gen_par <- gen_model(model_par   = est_par,
-                       fixed       = fixed,
-                       framework   = framework
+  gen_par <- gen_model(model_par    = est_par,
+                       fixed        = fixed,
+                       framework    = framework
   )
   
   # Monte-Carlo approximation --------------------------------------------------
@@ -144,7 +144,7 @@ model_par <- function(framework,
                       fixed,
                       transformation_par) {
   # browser()
-  if(is.null(framework$weights)) {
+  if(is.null(framework$weights) | (framework$only_lmewgts == TRUE)) {
     # fixed parametersn
     betas <- nlme::fixed.effects(mixed_model)
     # Estimated error variance
@@ -240,7 +240,7 @@ model_par <- function(framework,
 gen_model <- function(fixed,
                       framework,
                       model_par) {
-  if(is.null(framework$weights)) {
+  if(is.null(framework$weights) | (framework$only_lmewgts == TRUE)) {
     # Parameter for calculating variance of new random effect
     gamma <- model_par$sigmau2est / (model_par$sigmau2est +
                                        model_par$sigmae2est / framework$n_smp)

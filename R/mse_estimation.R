@@ -418,8 +418,7 @@ mse_estim_wrapper <-  function(i,
                    L               = L, 
                    boot_type       = boot_type,
                    weights         = weights,
-                   pop_weights     = pop_weights
-                   )
+                   pop_weights     = pop_weights)
 
   if (i %% 10 == 0) {
     if (i != B) {

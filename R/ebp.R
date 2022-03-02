@@ -92,6 +92,9 @@
 #' Defaults to \code{NULL}.
 #' @param pop_weights a character string containing the name of a variable that indicates 
 #' population weights in the sample data
+#' @param only_lmewgts a logical, if TRUE, the sample weights will be applied within the linear mixed
+#' effects regression ONLY i.e. removing the weights from parameter generation. If FALSE (defaults),
+#' the sample weights are used within the LME and the parameter estimation. 
 #' @param rescale_weights a logical, if FALSE, the sample weights do not change. When TRUE (default),
 #' the sample weights are rescaled such that the average weight is 1. 
 #' @param rescale_popweights a logical, if FALSE (default), the sample weights do not change. When TRUE,
@@ -181,28 +184,30 @@
 #' qnorm quantile residuals rnorm sd
 #' @importFrom utils flush.console
 #' @importFrom stats fitted
+#' @importFrom collapse flag
 
 ebp <- function(fixed,
                 pop_data,
                 pop_domains,
                 smp_data,
                 smp_domains,
-                L = 50,
-                threshold = NULL,
-                transformation = "box.cox",
-                interval = 'default',
-                MSE = FALSE,
-                B = 50,
-                seed = 123,
-                boot_type = "parametric",
-                parallel_mode = ifelse(grepl("windows",.Platform$OS.type), 
-                                       "socket", "multicore"),
-                cpus = 1,
-                custom_indicator = NULL, 
-                na.rm = FALSE,
-                weights = NULL,
-                pop_weights = NULL,
-                rescale_weights = TRUE,
+                L                  = 50,
+                threshold          = NULL,
+                transformation     = "box.cox",
+                interval           = 'default',
+                MSE                = FALSE,
+                B                  = 50,
+                seed               = 123,
+                boot_type          = "parametric",
+                parallel_mode      = ifelse(grepl("windows",.Platform$OS.type), 
+                                                  "socket", "multicore"),
+                cpus               = 1,
+                custom_indicator   = NULL, 
+                na.rm              = FALSE,
+                weights            = NULL,
+                pop_weights        = NULL,
+                only_lmewgts       = FALSE,
+                rescale_weights    = TRUE,
                 rescale_popweights = FALSE
 ) {
 
@@ -246,7 +251,8 @@ ebp <- function(fixed,
                               weights            = weights,
                               pop_weights        = pop_weights,
                               rescale_weights    = rescale_weights,
-                              rescale_popweights = rescale_popweights)
+                              rescale_popweights = rescale_popweights,
+                              only_lmewgts       = only_lmewgts)
 
 
   
@@ -260,8 +266,7 @@ ebp <- function(fixed,
                              L              = L,
                              keep_data      = TRUE,
                              weights        = weights,
-                             pop_weights    = pop_weights
-                             )
+                             pop_weights    = pop_weights)
 
 
 

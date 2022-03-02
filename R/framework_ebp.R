@@ -7,8 +7,9 @@
 
 
 framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, 
-                     threshold, custom_indicator = NULL, na.rm, weights = NULL,
-                     pop_weights = NULL, rescale_weights, rescale_popweights) {
+                          threshold, custom_indicator = NULL, na.rm, weights = NULL,
+                          pop_weights = NULL, rescale_weights, rescale_popweights,
+                          only_lmewgts) {
 
   # Reduction of number of variables
   mod_vars <- all.vars(fixed)
@@ -19,8 +20,8 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
   weights  <- weights
   pop_weights <- pop_weights
   fw_check1(pop_data = pop_data, mod_vars = mod_vars, pop_domains = pop_domains, 
-           smp_data = smp_data, fixed = fixed, smp_domains = smp_domains, 
-           threshold = threshold, weights = weights)
+            smp_data = smp_data, fixed = fixed, smp_domains = smp_domains, 
+            threshold = threshold, weights = weights)
  
 
   pop_data <- pop_data[, pop_vars]
@@ -97,30 +98,58 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
             smp_domains = smp_domains)
 
   indicator_list <- list(
-    fast_mean = function(y, threshold) {t(weighted.mean(y[1:(length(y)/2)],y[(1+length(y)/2):length(y)]))},
-    hcr = function(y, threshold) {t(weighted.mean(y[1:(length(y)/2)] < threshold,y[(1+length(y)/2):length(y)]))},
-    pgap = function(y, threshold) {t(mean((y < threshold) * (threshold - y) / threshold))},
+    fast_mean = function(y, threshold) {t(weighted.mean(y[1:(length(y)/2)],
+                                                        y[(1+length(y)/2):length(y)]))},
+    hcr = function(y, threshold) {t(weighted.mean(y[1:(length(y)/2)] < threshold,
+                                                  y[(1+length(y)/2):length(y)]))},
+    pgap = function(y, threshold) {
+      # t(mean((y < threshold) * (threshold - y) / threshold))
+      dt <- data.frame(x = y[1:(length(y)/2)],
+                       w = y[(1+length(y)/2):length(y)])
+      dt$poor <- (dt$x < threshold)
+      weight_pov <- dt$w[dt$poor]
+      weight_total <- sum(dt$w)
+      d <- (1 - (dt$x[dt$poor] / threshold))
+      fgt1 <- sum(d * weight_pov) / weight_total
+      return(fgt1)
+      },
     gini = function(y, threshold) {
-      n <- length(y)
-      y <- sort(y)
-      G <- sum(y * 1L:n)
-      G <- 2 * G / sum(y) - (n + 1L)
-      G <- t(G / n)
-      return(G)
+      
+      n <- length(y[1:(length(y)/2)]) 
+      dt <- data.frame(x = y[1:(length(y)/2)],
+                       w = y[(1+length(y)/2):length(y)])
+      dt <- dt[order(dt$x),]
+      # Compute weighted welfare
+      y <- dt$x * dt$w
+      y_lag <- collapse::flag(y, fill = 0)
+      
+      # Compute area under the curve using
+      # Area of trapezoid = Base * Average height
+      v <- (cumsum(y_lag) + (y / 2)) * dt$w
+      auc <- sum(v) # Area Under the Curve
+      
+      # Compute Area Under the Lorenz Curve
+      # Normalize auc so it is always between 0 and 0.5
+      auc <- (auc / sum(dt$w)) / sum(y)
+      
+      # Compute Gini
+      gini <- 1 - (2 * auc)
+      
+      return(gini)
     }
     ,
     qsr = function(y, threshold) {   
-      weights <- rep.int(1, length(y))
-      quant14 <- wtd.quantile(x = y, 
-                            weights = weights,
-                            probs = c(0.2, 0.8))
+      weights <- y[(1+length(y)/2):length(y)]
+      quant14 <- wtd.quantile(x = y[1:(length(y)/2)], 
+                              weights = weights,
+                              probs = c(0.2, 0.8))
     
-      iq1 <- y <= quant14[1]
-      iq4 <- y > quant14[2]
+      iq1 <- y[1:(length(y)/2)] <= quant14[1]
+      iq4 <- y[1:(length(y)/2)] > quant14[2]
       t((sum(weights[iq4] * y[iq4])/sum(weights[iq4]))/
           (sum(weights[iq1] * y[iq1])/sum(weights[iq1])))
       },
-    quants = function(y, threshold) {t(quantile(y, probs = c(.10,.25, .5, .75, .9)))}
+    quants = function(y, threshold) {t(quantile(y[1:(length(y)/2)], probs = c(.10,.25, .5, .75, .9)))}
   )
   
   indicator_names <- c("Mean",
@@ -168,8 +197,8 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
               indicator_names  = indicator_names,
               threshold        = threshold,
               weights          = weights,
-              pop_weights      = pop_weights
-              )
+              pop_weights      = pop_weights,
+              only_lmewgts     = only_lmewgts)
          )
 }
 
