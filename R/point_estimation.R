@@ -53,7 +53,7 @@ point_estim <- function (framework,
   # See Molina and Rao (2010) p. 374
   # lme function is included in the nlme package which is imported.
   
-  if(is.null(framework$weights) == TRUE){
+  if(is.null(framework$weights) == TRUE | (framework$only_lmewgts == FALSE)){
     
     mixed_model <- nlme::lme(fixed  = fixed,
                              data   = transformation_par$transformed_data ,

@@ -54,7 +54,8 @@ Imports:
     formula.tools,
     saeRobust,
     spdep,
-    bestNormalize
+    bestNormalize,
+    collapse
 Suggests:
     testthat,
     R.rsp,

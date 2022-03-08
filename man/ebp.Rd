@@ -24,6 +24,7 @@ ebp(
   na.rm = FALSE,
   weights = NULL,
   pop_weights = NULL,
+  only_lmewgts = FALSE,
   rescale_weights = TRUE,
   rescale_popweights = FALSE
 )
@@ -125,6 +126,10 @@ Defaults to \code{NULL}.}
 
 \item{pop_weights}{a character string containing the name of a variable that indicates 
 population weights in the sample data}
+
+\item{only_lmewgts}{a logical, if TRUE, the sample weights will be applied within the linear mixed
+effects regression ONLY i.e. removing the weights from parameter generation. If FALSE (defaults),
+the sample weights are used within the LME and the parameter estimation.}
 
 \item{rescale_weights}{a logical, if FALSE, the sample weights do not change. When TRUE (default),
 the sample weights are rescaled such that the average weight is 1.}
