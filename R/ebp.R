@@ -92,9 +92,10 @@
 #' Defaults to \code{NULL}.
 #' @param pop_weights a character string containing the name of a variable that indicates 
 #' population weights in the sample data
-#' @param only_lmewgts a logical, if TRUE, the sample weights will be applied within the linear mixed
-#' effects regression ONLY i.e. removing the weights from parameter generation. If FALSE (defaults),
-#' the sample weights are used within the LME and the parameter estimation. 
+#' @param use_lmewgts a logical, if TRUE, the sample weights will be applied to the LME model, if FALSE,
+#' it will not be
+#' @param use_emdiwgts a logical, if TRUE, the sample weights will be applied to parameter estimation for
+#' beta, random effects and error terms
 #' @param rescale_weights a logical, if FALSE, the sample weights do not change. When TRUE (default),
 #' the sample weights are rescaled such that the average weight is 1. 
 #' @param rescale_popweights a logical, if FALSE (default), the sample weights do not change. When TRUE,
@@ -206,7 +207,8 @@ ebp <- function(fixed,
                 na.rm              = FALSE,
                 weights            = NULL,
                 pop_weights        = NULL,
-                only_lmewgts       = FALSE,
+                use_lmewgts        = FALSE,
+                use_emdiwgts       = FALSE,
                 rescale_weights    = TRUE,
                 rescale_popweights = FALSE
 ) {
@@ -252,7 +254,8 @@ ebp <- function(fixed,
                               pop_weights        = pop_weights,
                               rescale_weights    = rescale_weights,
                               rescale_popweights = rescale_popweights,
-                              only_lmewgts       = only_lmewgts)
+                              use_lmewgts        = use_lmewgts,
+                              use_emdiwgts       = use_emdiwgts)
 
 
   

@@ -53,7 +53,8 @@ point_estim <- function (framework,
   # See Molina and Rao (2010) p. 374
   # lme function is included in the nlme package which is imported.
   
-  if(is.null(framework$weights) == TRUE | (framework$only_lmewgts == FALSE)){
+  if(is.null(framework$weights) == TRUE | (framework$use_lmewgts == FALSE)){ ### or an argument for 
+                                                                             ### lmeweights == FALSE
     
     mixed_model <- nlme::lme(fixed  = fixed,
                              data   = transformation_par$transformed_data ,
@@ -143,8 +144,8 @@ model_par <- function(framework,
                       mixed_model,
                       fixed,
                       transformation_par) {
-  # browser()
-  if(is.null(framework$weights) | (framework$only_lmewgts == TRUE)) {
+  # browser() ###replace lmewgts argument with framework_emdiweights == FALSE
+  if(is.null(framework$weights) | (framework$use_emdiwgts == FALSE)) {
     # fixed parametersn
     betas <- nlme::fixed.effects(mixed_model)
     # Estimated error variance
@@ -240,7 +241,7 @@ model_par <- function(framework,
 gen_model <- function(fixed,
                       framework,
                       model_par) {
-  if(is.null(framework$weights) | (framework$only_lmewgts == TRUE)) {
+  if(is.null(framework$weights) | (framework$use_emdiwgts == FALSE)) {
     # Parameter for calculating variance of new random effect
     gamma <- model_par$sigmau2est / (model_par$sigmau2est +
                                        model_par$sigmae2est / framework$n_smp)
@@ -333,7 +334,7 @@ monte_carlo <- function(transformation,
       
     } else {
       
-      if(is.null(framework$pop_weights) == FALSE) {
+      if(is.null(framework$pop_weights) == TRUE) {
         
         framework$pop_data[,framework$pop_weights] <- rep(1, length(framework$pop_domains_vec))
         

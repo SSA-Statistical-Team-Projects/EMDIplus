@@ -9,7 +9,7 @@
 framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, 
                           threshold, custom_indicator = NULL, na.rm, weights = NULL,
                           pop_weights = NULL, rescale_weights, rescale_popweights,
-                          only_lmewgts) {
+                          use_lmewgts, use_emdiwgts) {
 
   # Reduction of number of variables
   mod_vars <- all.vars(fixed)
@@ -198,7 +198,8 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
               threshold        = threshold,
               weights          = weights,
               pop_weights      = pop_weights,
-              only_lmewgts     = only_lmewgts)
+              use_lmewgts      = use_lmewgts,
+              use_emdiwgts     = use_emdiwgts)
          )
 }
 
