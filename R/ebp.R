@@ -287,8 +287,9 @@ ebp <- function(fixed,
                                           B              = B,
                                           boot_type      = boot_type,
                                           parallel_mode  = parallel_mode,
-                                          cpus           = cpus
-                                          )
+                                          cpus           = cpus,
+                                          weights        = weights,
+                                          pop_weights    = pop_weights)
 
 
 

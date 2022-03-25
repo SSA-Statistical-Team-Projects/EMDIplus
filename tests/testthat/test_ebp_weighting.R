@@ -16,14 +16,15 @@ ebp_wgt1 <- ebp(fixed = income ~ educ1,
                 pop_domains = "domain",
                 smp_data = incomedata, 
                 smp_domains = "prov",
-                L = 2, threshold = 10000,
+                L = 20, threshold = 10000,
                 transformation = "log",
                 weights = "weight",
                 pop_weights = "population",
                 MSE = TRUE,
-                B = 2,
+                B = 20,
                 use_lmewgts = TRUE,
-                use_emdiwgts = TRUE) ##result looks right to me
+                use_emdiwgts = TRUE,
+                cpus = 30) ##result looks right to me
 
 #### testing the application of LME weights + population weights - parameter weighting
 ebp_wgt2 <- ebp(fixed = income ~ educ1,
