@@ -9,7 +9,8 @@
 framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, 
                           threshold, custom_indicator = NULL, na.rm, weights = NULL,
                           pop_weights = NULL, rescale_weights, rescale_popweights,
-                          use_lmewgts, use_emdiwgts) {
+                          use_lmewgts, use_emdiwgts, lmecontrol_maxiter,
+                          lmecontrol_option) {
 
   # Reduction of number of variables
   mod_vars <- all.vars(fixed)
@@ -25,6 +26,9 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
  
 
   pop_data <- pop_data[, pop_vars]
+  
+  lmecontrol_maxiter <- lmecontrol_maxiter
+  lmecontrol_option  <- lmecontrol_option
 
   # Deletion of NA
   if (na.rm == TRUE) {
@@ -178,28 +182,30 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
   
   
 
-  return(list(pop_data         = pop_data,
-              pop_domains_vec  = pop_domains_vec,
-              smp_data         = smp_data,
-              smp_domains_vec  = smp_domains_vec,
-              smp_domains      = smp_domains,
-              N_pop            = N_pop,
-              N_smp            = N_smp,
-              N_unobs          = N_unobs,
-              N_dom_pop        = N_dom_pop,
-              N_dom_smp        = N_dom_smp,
-              N_dom_unobs      = N_dom_unobs,
-              n_pop            = n_pop,
-              n_smp            = n_smp,
-              obs_dom          = obs_dom,
-              dist_obs_dom     = dist_obs_dom,
-              indicator_list   = indicator_list,
-              indicator_names  = indicator_names,
-              threshold        = threshold,
-              weights          = weights,
-              pop_weights      = pop_weights,
-              use_lmewgts      = use_lmewgts,
-              use_emdiwgts     = use_emdiwgts)
+  return(list(pop_data           = pop_data,
+              pop_domains_vec    = pop_domains_vec,
+              smp_data           = smp_data,
+              smp_domains_vec    = smp_domains_vec,
+              smp_domains        = smp_domains,
+              N_pop              = N_pop,
+              N_smp              = N_smp,
+              N_unobs            = N_unobs,
+              N_dom_pop          = N_dom_pop,
+              N_dom_smp          = N_dom_smp,
+              N_dom_unobs        = N_dom_unobs,
+              n_pop              = n_pop,
+              n_smp              = n_smp,
+              obs_dom            = obs_dom,
+              dist_obs_dom       = dist_obs_dom,
+              indicator_list     = indicator_list,
+              indicator_names    = indicator_names,
+              threshold          = threshold,
+              weights            = weights,
+              pop_weights        = pop_weights,
+              use_lmewgts        = use_lmewgts,
+              use_emdiwgts       = use_emdiwgts,
+              lmecontrol_maxiter = lmecontrol_maxiter,
+              lmecontrol_option  = lmecontrol_option)
          )
 }
 

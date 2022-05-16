@@ -100,6 +100,10 @@
 #' the sample weights are rescaled such that the average weight is 1. 
 #' @param rescale_popweights a logical, if FALSE (default), the sample weights do not change. When TRUE,
 #' the sample weights are rescaled such that the average weight is 1.
+#' @param lmecontrol_maxiter an integer, the maximum number of iterations the lme function will run for parameter 
+#' convergence
+#' @param lmecontrol_option a character string, the optimizer to be used within the lmecontrol system. The options are
+#' "nlminb" and "optim"
 #' @return An object of class "ebp", "emdi" that provides estimators for regional
 #' disaggregated indicators and optionally corresponding MSE estimates. Several 
 #' generic functions have methods for the 
@@ -210,7 +214,9 @@ ebp <- function(fixed,
                 use_lmewgts        = FALSE,
                 use_emdiwgts       = FALSE,
                 rescale_weights    = TRUE,
-                rescale_popweights = FALSE
+                rescale_popweights = FALSE,
+                lmecontrol_maxiter = 1000,
+                lmecontrol_option  = "optim"
 ) {
 
   ebp_check1(fixed = fixed, pop_data = pop_data, pop_domains = pop_domains,
@@ -255,7 +261,9 @@ ebp <- function(fixed,
                               rescale_weights    = rescale_weights,
                               rescale_popweights = rescale_popweights,
                               use_lmewgts        = use_lmewgts,
-                              use_emdiwgts       = use_emdiwgts)
+                              use_emdiwgts       = use_emdiwgts,
+                              lmecontrol_maxiter = lmecontrol_maxiter,
+                              lmecontrol_option  = lmecontrol_option)
 
 
   
