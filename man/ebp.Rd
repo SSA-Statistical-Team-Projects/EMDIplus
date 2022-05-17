@@ -24,9 +24,12 @@ ebp(
   na.rm = FALSE,
   weights = NULL,
   pop_weights = NULL,
-  only_lmewgts = FALSE,
+  use_lmewgts = FALSE,
+  use_emdiwgts = FALSE,
   rescale_weights = TRUE,
-  rescale_popweights = FALSE
+  rescale_popweights = FALSE,
+  lmecontrol_maxiter = 1000,
+  lmecontrol_option = "optim"
 )
 }
 \arguments{
@@ -127,15 +130,23 @@ Defaults to \code{NULL}.}
 \item{pop_weights}{a character string containing the name of a variable that indicates 
 population weights in the sample data}
 
-\item{only_lmewgts}{a logical, if TRUE, the sample weights will be applied within the linear mixed
-effects regression ONLY i.e. removing the weights from parameter generation. If FALSE (defaults),
-the sample weights are used within the LME and the parameter estimation.}
+\item{use_lmewgts}{a logical, if TRUE, the sample weights will be applied to the LME model, if FALSE,
+it will not be}
+
+\item{use_emdiwgts}{a logical, if TRUE, the sample weights will be applied to parameter estimation for
+beta, random effects and error terms}
 
 \item{rescale_weights}{a logical, if FALSE, the sample weights do not change. When TRUE (default),
 the sample weights are rescaled such that the average weight is 1.}
 
 \item{rescale_popweights}{a logical, if FALSE (default), the sample weights do not change. When TRUE,
 the sample weights are rescaled such that the average weight is 1.}
+
+\item{lmecontrol_maxiter}{an integer, the maximum number of iterations the lme function will run for parameter 
+convergence}
+
+\item{lmecontrol_option}{a character string, the optimizer to be used within the lmecontrol system. The options are
+"nlminb" and "optim"}
 }
 \value{
 An object of class "ebp", "emdi" that provides estimators for regional
