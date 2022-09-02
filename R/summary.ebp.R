@@ -40,15 +40,21 @@ summary.ebp <- function(object, ...) {
                                    row.names       = ""
     )
   }
+  else if (object$transformation == "ordernorm") {
+    transform_method <- data.frame(Transformation  = object$transformation,
+                                   Shift_parameter = 0,
+                                   row.names       = "" 
+    )
+  }
   else if (object$transformation == "no") {
     transform_method <- NULL
   }
   
-  skewness_res <- skewness(residuals(object$model, level = 0, type = "pearson"))
-  kurtosis_res <- kurtosis(residuals(object$model, level = 0, type = "pearson"))
+  skewness_res <- moments::skewness(residuals(object$model, level = 0, type = "pearson"))
+  kurtosis_res <- moments::kurtosis(residuals(object$model, level = 0, type = "pearson"))
   
-  skewness_ran <- skewness(ranef(object$model)$'(Intercept)')
-  kurtosis_ran <- kurtosis(ranef(object$model)$'(Intercept)')
+  skewness_ran <- moments::skewness(ranef(object$model)$'(Intercept)')
+  kurtosis_ran <- moments::kurtosis(ranef(object$model)$'(Intercept)')
   
   if (length(residuals(object$model, level = 0, type = "pearson")) > 3 &
       length(residuals(object$model, level = 0, type = "pearson")) < 5000) {
@@ -82,7 +88,7 @@ summary.ebp <- function(object, ...) {
   )
   tempMod <- object$model
   tempMod$call$fixed <- object$fixed
-  r_squared <- suppressWarnings(r.squaredGLMM(tempMod))
+  r_squared <- suppressWarnings(MuMIn::r.squaredGLMM(tempMod))
   if (is.matrix(r_squared)) {
     r_marginal <- r_squared[1, 1]
     r_conditional <- r_squared[1, 2]
@@ -163,5 +169,12 @@ icc <- function(model){
   u <- as.numeric(VarCorr(model)[1,1])
   e <- model$sigma^2
   u / (u + e)
+}
+
+throw_class_error <- function(object, subclass){
+  if(!inherits(object, "emdi")){
+    error_string <- paste0(subclass, " object has to be created by the emdi package for emdi methods to work.")
+    stop(error_string)
+  }
 }
 
