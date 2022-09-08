@@ -6,7 +6,7 @@
 ebp_check1 <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, L){
   
   
-
+  
   if (is.null(fixed)  || !inherits(fixed, "formula")) {
     stop('Fixed must be a formula object. See also help(ebp).')
   } 
@@ -28,14 +28,14 @@ ebp_check1 <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, L){
           specifying the variable (name)  of a numeric or factor variable 
           indicating domains in the sample data. See also help(ebp).')
   }
-
+  
   if (!is.numeric(L) || length(L) != 1 || L < 1) {
     stop('L needs to be a single value, interpreted as an integer, determining 
           the number of Monte-Carlo simulations. The value must be at least 
           1. See also help(ebp).')
   }
   if (!all(unique(as.character(smp_data[[smp_domains]])) %in% 
-      unique(as.character(pop_data[[pop_domains]])))) {
+           unique(as.character(pop_data[[pop_domains]])))) {
     stop('The sample data contains domains that are
          not contained in the population data.')
   }
@@ -44,7 +44,7 @@ ebp_check1 <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, L){
 ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B, 
                        custom_indicator, cpus, seed, na.rm, weights){
   if (!is.null(threshold) && !(is.numeric(threshold) && length(threshold) == 1)
-       && !inherits(threshold, "function")) { 
+      && !inherits(threshold, "function")) { 
     stop("threshold needs to be a single numeric value or a function of y. 
           If it is NULL 60% of the median is selected as threshold.
          See also help(ebp).")
@@ -56,14 +56,14 @@ ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B,
           See also help(ebp).')
   }
   if (is.null(transformation) || !(transformation == "box.cox" 
-        || transformation == "log" || transformation == "dual" || transformation == "log.shift"
-        || transformation == "no" || transformation == "arcsin" || transformation == "ordernorm")) {
+                                   || transformation == "log" || transformation == "dual" || transformation == "log.shift"
+                                   || transformation == "no" || transformation == "arcsin" || transformation == "ordernorm")) {
     stop("The five options for transformation are ''no'', ''log'', ''box.cox'', 
          ''dual'' or ''log.shift'' or ''arcsin'' or ''ordernorm''." )
   }
   if (any(interval != 'default') & (!is.vector(interval, mode = "numeric") || 
-      length(interval) != 2 || !(interval[1] < interval[2]))) {
-         stop("interval needs to be a numeric vector of length 2 
+                                    length(interval) != 2 || !(interval[1] < interval[2]))) {
+    stop("interval needs to be a numeric vector of length 2 
               defining a lower and upper limit for the estimation of the optimal 
               transformation parameter. The value of the lower limit needs to be 
               smaller than the upper limit. You can also choose 'default'. See also help(ebp).")
@@ -77,7 +77,7 @@ ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B,
          help(ebp).")
   }
   if (is.null(boot_type) || !(length(boot_type) == 1 && (boot_type == "parametric" 
-                                   || boot_type == "wild"))) {
+                                                         || boot_type == "wild"))) {
     stop("The two bootstrap procedures are ''parametric'' or ''wild''." )
   }
   if (MSE == TRUE && !(is.numeric(B) && length(B) == 1  && B > 1)) {
@@ -113,7 +113,7 @@ ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B,
              two arguments: y, threshold; even though a threshold might not 
              included in the indicator. For help see Example 2 in help(ebp).")
       }
-      }
+    }
   }
   if (!(inherits(na.rm, "logical") && length(na.rm) == 1)) {
     stop("na.rm needs to be a logical value. Set na.rm to TRUE or FALSE. See 
@@ -124,22 +124,24 @@ ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B,
          specifying the variable name of a numeric variable 
          indicating weights in the sample data. See also help(ebp).')
   }
-  if(!is.null(weights) && !(transformation == "log"|| transformation == "no" || 
-                            transformation == "ordernorm" || transformation == "arcsin")) {
+  
+  #if(!is.null(weights) && !(transformation == "log"|| transformation == "no" || 
+  #                         transformation == "ordernorm" || transformation == "arcsin")) {
+  if(!is.null(use_emdiwgts) && !(transformation == "log"|| transformation == "no")) {
     stop("Weighted ebp can only be used without transformation, the log-
-    transformation, ordernorm or arcsin tranformations")
+    transformation, ordernorm or arcsin tranformations when using emdi weights")
   }
   if(!is.null(weights) && isTRUE(MSE) && boot_type == "wild") {
     stop("The weighted version of ebp is only available with the ''parametric'' 
          bootstrap.")
   }
-    
+  
 }
 
 
 # Functions called in notation
 fw_check1 <- function(pop_data, mod_vars, pop_domains, smp_data, 
-                      fixed, smp_domains, threshold, weights) {
+                      fixed, smp_domains, threshold, weights,pop_weights) {
   if (!all(mod_vars %in% colnames(pop_data))) {
     stop(paste0("Variable ", mod_vars[which(!(mod_vars %in% colnames(smp_data)))], " is not contained in pop_data.
                 Please provide valid variable names for the explanatory variables."))
@@ -161,33 +163,41 @@ fw_check1 <- function(pop_data, mod_vars, pop_domains, smp_data,
                 Please provide valid variable name for the dependent variable."))
   }
   
- if (!is.numeric(smp_data[[paste(fixed[2])]])) {
-   stop(paste0(as.character(fixed[2])," must be the name of a variable that 
+  if (!is.numeric(smp_data[[paste(fixed[2])]])) {
+    stop(paste0(as.character(fixed[2])," must be the name of a variable that 
                is a numeric vector."))
- }
+  }
   if (is.character(weights)) {
     if(!(weights %in% colnames(smp_data)))
-    stop(paste0("The weights variable ", weights, " is not contained in smp_data.
+      stop(paste0("The weights variable ", weights, " is not contained in smp_data.
                 Please provide a valid variable name for the weights variable."))
   }
   if (is.character(weights)) {
     if (!is.numeric(smp_data[[weights]]))
-    stop(paste0("The variable ", weights, " must be the name of a variable that
+      stop(paste0("The variable ", weights, " must be the name of a variable that
                 is a numeric vector."))
   }
   if(is.character(weights)) {
     if(!all(smp_data[[weights]] >= 1))
-    stop(paste0("Negativ or zero weights are included in ", weights, " Please remove 
-                obersvations with weight values smaller than 1."))
+      stop(paste0("Negative or zero weights are included in ", weights, ". Please remove 
+                observations with weight values smaller than 1."))
+  }
+  if(is.character(pop_weights)) {
+    if(!all(pop_data[pop_weights] > 0))
+      stop(paste0("Negative or zero weights are included in ", pop_weights, ". Please remove 
+                observations with weight values less than or equal to 0."))
   }
   
- if (dim(pop_data)[1] < dim(smp_data)[1]) {
+  
+  
+  
+  if (dim(pop_data)[1] < dim(smp_data)[1]) {
     stop("The population data set cannot have less observations than the 
          sample data set.")
- }
-
+  }
+  
   if (inherits(threshold, "function") && (!is.numeric(threshold(smp_data[[paste(fixed[2])]])) 
-      || length(threshold(smp_data[[paste(fixed[2])]])) != 1)) {
+                                          || length(threshold(smp_data[[paste(fixed[2])]])) != 1)) {
     stop("The threshold function must return a single numeric value when evaluated
          with the dependent variable.")
   }
@@ -207,7 +217,7 @@ fw_check2 <- function(pop_domains, pop_domains_vec, smp_domains, smp_domains_vec
            a (ordered) factor."))
   }
   if ((is.numeric(pop_domains_vec) && any(inherits(smp_domains_vec, "factor"))) ||
-     (is.numeric(smp_domains_vec) && any(inherits(pop_domains_vec, "factor"))) ) {
+      (is.numeric(smp_domains_vec) && any(inherits(pop_domains_vec, "factor"))) ) {
     stop(paste0(pop_domains, " and ", smp_domains," need to be names of variables that are
           of the same class (factor and ordered factor are considered to be 
          the same class). See also help(ebp)."))
