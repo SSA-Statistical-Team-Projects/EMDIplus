@@ -39,6 +39,8 @@ parametric_bootstrap <- function(framework,
       parallel::clusterSetRNGStream()
     } 
     parallelMap::parallelLibrary("nlme")
+    parallelMap::parallelLibrary("bestNormalize")
+    
     mses <- simplify2array(parallelMap::parallelLapply(
                                    xs              = seq_len(B), 
                                    fun             = mse_estim_wrapper,
@@ -170,16 +172,16 @@ mse_estim <- function(framework,
   #                                                 threshold = framework$threshold)
   #                            )
   #)
-  if (is.null(framework$pop_weights)) {
-    framework$pop_data[,framework$pop_weights] <- rep(1, length(framework$pop_domains_vec))
-  } else {
+  #if (is.null(framework$pop_weights)) {
+  #  framework$pop_data[,framework$pop_weights] <- rep(1, length(framework$pop_domains_vec))
+  #} else {
     
     true_indicators <- matrix(nrow = framework$N_dom_pop,
                               data = unlist(lapply(framework$indicator_list,
                                                    function(f, threshold){
                                                      matrix(nrow = framework$N_dom_pop,
                                                             data = unlist(tapply(c(pop_income_vector,
-                                                                                   framework$pop_data[,framework$pop_weights]),
+                                                                                   framework$pop_data$pop_weights),
                                                                                  c(framework$pop_domains_vec,
                                                                                    framework$pop_domains_vec), f,
                                                                                  threshold = framework$threshold ,
@@ -192,7 +194,7 @@ mse_estim <- function(framework,
     )
     
     
-  }
+  #}
   
   
 

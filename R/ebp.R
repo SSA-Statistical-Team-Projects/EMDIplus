@@ -225,7 +225,7 @@ ebp <- function(fixed,
   ebp_check2(threshold = threshold, transformation = transformation, 
              interval = interval, MSE = MSE, boot_type = boot_type, B = B, 
              custom_indicator = custom_indicator, cpus = cpus,  seed = seed,
-             na.rm = na.rm, weights = weights)
+             na.rm = na.rm, weights = weights, use_emdiwgts=use_emdiwgts)
 
   # Save function call ---------------------------------------------------------
 

@@ -12,6 +12,8 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
                           use_lmewgts, use_emdiwgts, lmecontrol_maxiter,
                           lmecontrol_option) {
 
+  
+  
   # Reduction of number of variables
   mod_vars <- all.vars(fixed)
   mod_vars <- mod_vars[mod_vars != as.character(fixed[2])]
@@ -40,12 +42,19 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
   }
   
 
-  if (is.null(pop_weights) == FALSE & is.null(weights) == TRUE){
+  if (is.null(weights) == TRUE){
     
     message('Missing sample weights, vector of 1s created')
-    pop_data$weights <- rep(1, nrow(smp_data))
+    smp_data$weights <- rep(1, nrow(smp_data))
     
   }
+  
+  if (is.null(pop_weights) == TRUE) {
+    pop_weights <- "pop_weights"
+    pop_data$pop_weights <- rep(1, nrow(pop_data))
+    message('Missing population weights, vector of 1s created')
+  }
+  
   
   # Rescale the weights
   if(rescale_weights == TRUE){

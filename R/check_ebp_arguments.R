@@ -42,7 +42,7 @@ ebp_check1 <- function(fixed, pop_data, pop_domains, smp_data, smp_domains, L){
 }
 
 ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B, 
-                       custom_indicator, cpus, seed, na.rm, weights){
+                       custom_indicator, cpus, seed, na.rm, weights, use_emdiwgts){
   if (!is.null(threshold) && !(is.numeric(threshold) && length(threshold) == 1)
       && !inherits(threshold, "function")) { 
     stop("threshold needs to be a single numeric value or a function of y. 
