@@ -154,23 +154,24 @@ mse_estim <- function(framework,
       framework$threshold(y = pop_income_vector)
   }
   # True indicator values
-  if (is.null(framework$weights) == FALSE & is.null(framework$pop_weights) == TRUE){
-    
-    true_indicators <- matrix(nrow = framework$N_dom_pop,
-                              data = unlist(lapply(framework$indicator_list,
-                                                   function(f, threshold){
-                                                     matrix(nrow = framework$N_dom_pop,
-                                                            data = unlist(tapply(pop_income_vector,
-                                                                                 framework$pop_domains_vec, f,
-                                                                                 threshold = framework$threshold ,
-                                                                                 simplify = TRUE)
-                                                            ),
-                                                            byrow = TRUE)
-                                                   },
-                                                   threshold = framework$threshold)
-                              )
-    )
-    
+  #if (is.null(framework$weights) == FALSE & is.null(framework$pop_weights) == TRUE){
+  #  
+  #  true_indicators <- matrix(nrow = framework$N_dom_pop,
+  #                            data = unlist(lapply(framework$indicator_list,
+  #                                                 function(f, threshold){
+  #                                                   matrix(nrow = framework$N_dom_pop,
+  #                                                          data = unlist(tapply(pop_income_vector,
+  #                                                                               framework$pop_domains_vec, f,
+  #                                                                               threshold = framework$threshold ,
+  #                                                                               simplify = TRUE)
+  #                                                          ),
+  #                                                          byrow = TRUE)
+  #                                                 },
+  #                                                 threshold = framework$threshold)
+  #                            )
+  #)
+  if (is.null(framework$pop_weights)) {
+    framework$pop_data[,framework$pop_weights] <- rep(1, length(framework$pop_domains_vec))
   } else {
     
     true_indicators <- matrix(nrow = framework$N_dom_pop,
