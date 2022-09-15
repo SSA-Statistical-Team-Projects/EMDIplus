@@ -12,11 +12,11 @@
 
 #' Tranforms dependent variables
 #'
-#' Function \code{data_transformation} transforms the dependent variable from 
-#' the formula object \code{fixed} in the given sample data set. Thus, it 
-#' returns the original sample data set with transformed dependent variable. 
-#' For the transformation five types can be chosen, particularly no, natural 
-#' log, Box-Cox, Dual and Log-Shift transformation.  
+#' Function \code{data_transformation} transforms the dependent variable from
+#' the formula object \code{fixed} in the given sample data set. Thus, it
+#' returns the original sample data set with transformed dependent variable.
+#' For the transformation five types can be chosen, particularly no, natural
+#' log, Box-Cox, Dual and Log-Shift transformation.
 #'
 #' @param fixed a two-sided linear formula object describing the
 #' fixed-effects part of the nested error linear regression model with the
@@ -32,31 +32,31 @@
 #' (ii) natural log transformation ("log"); (iii) Box-Cox transformation
 #' ("box.cox"); (iv) Dual transformation ("dual"); (v) Log-Shift transformation
 #' ("log.shift")..
-#' @param lambda a scalar parameter that determines the transformations with 
-#' transformation parameter. In case of no and natural log transformation 
+#' @param lambda a scalar parameter that determines the transformations with
+#' transformation parameter. In case of no and natural log transformation
 #' \code{lambda} can be set to NULL.
 #' @return a named list with two elements, a data frame containing the data set
-#' with transformed dependent variable (\code{transformed_data}) and a shift 
-#' parameter \code{shift} if present. In case of no transformation, the original 
+#' with transformed dependent variable (\code{transformed_data}) and a shift
+#' parameter \code{shift} if present. In case of no transformation, the original
 #' data frame is returned and the shift parameter is NULL.
-#' @details For the natural log, Box-Cox and Dual transformation, the dependent variable 
-#' is shifted such that all values are greater than zero since the transformations 
-#' are not applicable for values equal to or smaller than zero. The shift is 
-#' calculated as follows: 
+#' @details For the natural log, Box-Cox and Dual transformation, the dependent variable
+#' is shifted such that all values are greater than zero since the transformations
+#' are not applicable for values equal to or smaller than zero. The shift is
+#' calculated as follows:
 #'   \deqn{shift = |min(y)| + 1 \qquad if \qquad min(y) <= 0}
 #' Function \code{data_transformation} works as a wrapper function. This means
 #' that the function manages the selection of the three different transformation
-#' functions \code{no_transform}, \code{log_transform} and \code{box_cox}. 
+#' functions \code{no_transform}, \code{log_transform} and \code{box_cox}.
 #' @seealso \code{\link[nlme]{lme}}
 #' @examples
 #' # Loading data - sample data
 #' data("eusilcA_smp")
 #'
 #' # Transform dependent variable in sample data with Box-Cox transformation
-#' transform_data <- data_transformation(eqIncome ~ gender + eqsize + cash + 
-#' self_empl + unempl_ben + age_ben + surv_ben + sick_ben + dis_ben + rent + 
+#' transform_data <- data_transformation(eqIncome ~ gender + eqsize + cash +
+#' self_empl + unempl_ben + age_ben + surv_ben + sick_ben + dis_ben + rent +
 #' fam_allow + house_allow + cap_inv + tax_adj, eusilcA_smp, "box.cox", 0.7)
-#' 
+#'
 #' @importFrom bestNormalize orderNorm
 #' @export
 
@@ -66,7 +66,8 @@ data_transformation <- function(fixed,
                                 transformation,
                                 lambda) {
 
-  y_vector <- as.vector(smp_data[paste(fixed[2])])
+  #y_vector <- as.vector(smp_data[paste(fixed[2])])
+  y_vector <- unlist(smp_data[paste(fixed[2])])
 
   transformed <- if (transformation == "no") {
     no_transform(y = y_vector, shift = NULL)
@@ -117,8 +118,8 @@ std_data_transformation <- function(fixed=fixed,
     } else if (transformation == "ordernorm") {
       smp_data[paste(fixed[2])]
     }
-  
-  
+
+
   smp_data[paste(fixed[2])] <- std_transformed
   return(transformed_data = smp_data)
 } # End std_data_transformation
@@ -142,8 +143,8 @@ back_transformation <- function(y, transformation, lambda, shift, framework, fix
   } else if (transformation == "ordernorm") {
     ordernorm_transform_back(y = y, shift = shift, framework = framework, fixed = fixed)
   }
-  
-  
+
+
   return(y = back_transformed)
 } # End back_transform
 
@@ -163,7 +164,7 @@ no_transform_back <- function(y) {
   return(y = y)
 }
 
-# Arcsin transformation 
+# Arcsin transformation
 arcsin_transform <- function(y, shift = NULL) {
   y <- asin(sqrt(y))
   return(list(y = y, shift=shift))
@@ -174,21 +175,21 @@ arcsin_transform_back <- function(y, shift = NULL) {
   return(y = y)
 }
 
-# Order Norm 
+# Order Norm
 ordernorm_transform <- function(y, shift = NULL) {
   y <- orderNorm(unlist(y))$x.t
   return(list(y = y, shift = shift))
 }
 
 ordernorm_transform_back <- function(y, shift = NULL, framework, fixed){
-  
+
   ##create the orderNorm object from original transformation
   orderNorm_obj <- orderNorm(x = framework$smp_data[,paste(fixed[2])])
-  
+
   y <- inv_orderNorm_trans(orderNorm_obj = orderNorm_obj, new_points_x_t = y, warn = TRUE)
-  
+
   return(y = y)
-  
+
 }
 
 
@@ -289,7 +290,7 @@ box_cox_back <- function(y, lambda, shift = 0) {
 
 # Transformation: dual
 dual <-  function(y, lambda = lambda, shift = 0) {
-  
+
   with_shift <- function(y, shift) {
     min <- min(y)
     if (min <= 0) {
@@ -299,11 +300,11 @@ dual <-  function(y, lambda = lambda, shift = 0) {
     }
     return(shift)
   }
-  
+
   shift <- with_shift(y = y, shift = shift)
-  
+
   lambda_absolute <- abs(lambda)
-  
+
   if (lambda_absolute <= 1e-12) {  #case lambda=0
     yt <-  log(y + shift)
   } else if (lambda > 1e-12){
@@ -317,23 +318,23 @@ dual <-  function(y, lambda = lambda, shift = 0) {
 
 # Standardized transformation: dual
 dual_std <- function(y, lambda) {
-  
+
   min <- min(y)
   if (min <= 0) {
     y <- y - min + 1
   }
-  
+
   yt <- dual(y, lambda)$y
-  
+
   zt <- if (abs(lambda) > 1e-12) {
     geo <- geometric.mean(y^(lambda -1) + y^(-lambda -1))
     zt <- yt * 2 / geo
   } else {
     zt <- geometric.mean(y) * log(y)
   }
-  
+
   y <- zt
-  
+
   return(y)
 }
 
@@ -348,7 +349,7 @@ dual_back <- function(y, lambda = lambda, shift) {
   {
     y <- (lambda * y + sqrt(lambda^2 * y^2 + 1))^(1/lambda) - shift
   }
-  
+
   return(y = y)
 }
 
@@ -358,9 +359,9 @@ dual_back <- function(y, lambda = lambda, shift) {
 #  Transformation: log_shift_opt
 
 log_shift_opt <- function(y, lambda = lambda, shift = NULL) {
-  
+
   with_shift <-  function(y, lambda) {
-    
+
     min <- min(y + lambda)
     if (min <= 0) {
       lambda <- lambda + abs(min) + 1
@@ -369,10 +370,10 @@ log_shift_opt <- function(y, lambda = lambda, shift = NULL) {
     }
     return(lambda)
   }
-  
+
   # Shift parameter
   lambda <- with_shift(y = y, lambda = lambda )
-  
+
   log_trafo <- function(y, lambda = lambda) {
     y <- log(y + lambda)
     return(y)
@@ -391,7 +392,7 @@ geometric.mean <- function(x) { #for RMLE in the parameter estimation
 }
 
 log_shift_opt_std <- function(y, lambda) {
-  
+
   with_shift <-  function(y, lambda) {
     min <- min(y + lambda)
     if (min <= 0) {
@@ -401,10 +402,10 @@ log_shift_opt_std <- function(y, lambda) {
     }
     return(lambda)
   }
-  
+
   # Shift parameter
   lambda <- with_shift(y = y, lambda = lambda )
-  
+
   log_trafo_std <- function(y, lambda = lambda) {
     gm <- geometric.mean(y + lambda)
     y <- gm * log(y + lambda)
@@ -432,7 +433,7 @@ orderNorm_trans <- function(orderNorm_obj, new_points, warn) {
   vals <- suppressWarnings(
     approx(old_points, x_t, xout = new_points, rule = 1)
   )
-  
+
   # If predictions have been made outside observed domain
   if (any(is.na(vals$y))) {
     if (warn) warning('Transformations requested outside observed domain; logit approx. on ranks applied')
@@ -440,21 +441,21 @@ orderNorm_trans <- function(orderNorm_obj, new_points, warn) {
     p <- qnorm(fitted(fit, type = "response"))
     l_idx <- vals$x < min(old_points, na.rm = T)
     h_idx <- vals$x > max(old_points, na.rm = T)
-    
-    # Check 
+
+    # Check
     if (any(l_idx)) {
       xx <- data.frame(x = vals$x[l_idx])
-      vals$y[l_idx] <- qnorm(predict(fit, newdata = xx, type = 'response')) - 
+      vals$y[l_idx] <- qnorm(predict(fit, newdata = xx, type = 'response')) -
         (min(p, na.rm = T) - min(x_t, na.rm = T))
-      
+
     }
     if (any(h_idx)) {
       xx <- data.frame(x = vals$x[h_idx])
-      vals$y[h_idx] <- qnorm(predict(fit, newdata = xx, type = 'response')) - 
+      vals$y[h_idx] <- qnorm(predict(fit, newdata = xx, type = 'response')) -
         (max(p, na.rm = T) - max(x_t, na.rm = T))
     }
   }
-  
+
   vals$y
 }
 
@@ -465,31 +466,31 @@ inv_orderNorm_trans <- function(orderNorm_obj, new_points_x_t, warn) {
   vals <- suppressWarnings(
     approx(x_t, old_points, xout = new_points_x_t, rule = 1)
   )
-  
+
   # If predictions have been made outside observed domain
   if (any(is.na(vals$y))) {
     if(warn) warning('Transformations requested outside observed domain; logit approx. on ranks applied')
-    
+
     fit <- orderNorm_obj$fit
     p <- qnorm(fitted(fit, type = "response"))
     l_idx <- vals$x < min(x_t, na.rm = T)
     h_idx <- vals$x > max(x_t, na.rm = T)
-    
-    # Check 
+
+    # Check
     if (any(l_idx)) {
       # Solve algebraically from original transformation
-      logits <- log(pnorm(vals$x[l_idx] + min(p, na.rm = T) - min(x_t, na.rm = T)) / 
+      logits <- log(pnorm(vals$x[l_idx] + min(p, na.rm = T) - min(x_t, na.rm = T)) /
                       (1 - pnorm(vals$x[l_idx] + min(p, na.rm = T) - min(x_t, na.rm = T))))
-      vals$y[l_idx] <- 
+      vals$y[l_idx] <-
         unname((logits - fit$coef[1]) / fit$coef[2])
     }
     if (any(h_idx)) {
-      logits <- log(pnorm(vals$x[h_idx] + max(p, na.rm = T) - max(x_t, na.rm = T)) / 
+      logits <- log(pnorm(vals$x[h_idx] + max(p, na.rm = T) - max(x_t, na.rm = T)) /
                       (1 - pnorm(vals$x[h_idx] + max(p, na.rm = T) - max(x_t, na.rm = T))))
-      vals$y[h_idx] <- 
+      vals$y[h_idx] <-
         unname((logits - fit$coef[1]) / fit$coef[2])
     }
   }
-  
+
   vals$y
 }
