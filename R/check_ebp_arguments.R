@@ -127,7 +127,7 @@ ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B,
   
   #if(!is.null(weights) && !(transformation == "log"|| transformation == "no" || 
   #                         transformation == "ordernorm" || transformation == "arcsin")) {
-  if(use_emdiwgts==TRUE) && !(transformation == "log"|| transformation == "no")) {
+  if(use_emdiwgts==TRUE && !(transformation == "log"|| transformation == "no")) {
     stop("Weighted ebp can only be used without transformation or the log-
     transformation when using emdi weights")
   }
