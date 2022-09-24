@@ -127,9 +127,9 @@ ebp_check2 <- function(threshold, transformation, interval, MSE, boot_type, B,
   
   #if(!is.null(weights) && !(transformation == "log"|| transformation == "no" || 
   #                         transformation == "ordernorm" || transformation == "arcsin")) {
-  if(!is.null(use_emdiwgts) && !(transformation == "log"|| transformation == "no")) {
-    stop("Weighted ebp can only be used without transformation, the log-
-    transformation, ordernorm or arcsin tranformations when using emdi weights")
+  if(use_emdiwgts==TRUE) && !(transformation == "log"|| transformation == "no")) {
+    stop("Weighted ebp can only be used without transformation or the log-
+    transformation when using emdi weights")
   }
   if(!is.null(weights) && isTRUE(MSE) && boot_type == "wild") {
     stop("The weighted version of ebp is only available with the ''parametric'' 
