@@ -216,7 +216,7 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
               lmecontrol_maxiter = lmecontrol_maxiter,
               lmecontrol_option  = lmecontrol_option,
               lmecontrol_returnObject = lmecontrol_returnObject,
-              lmecontrol_tolerance = lmecontrol_tolerance
+              lmecontrol_tolerance = lmecontrol_tolerance)
          )
 }
 
