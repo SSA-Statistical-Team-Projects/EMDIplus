@@ -29,7 +29,9 @@ ebp(
   rescale_weights = TRUE,
   rescale_popweights = FALSE,
   lmecontrol_maxiter = 1000,
-  lmecontrol_option = "optim"
+  lmecontrol_option = "optim",
+  lmecontrol_returnObject = FALSE, 
+  lmecontrol_tolerance = 1e-6 
 )
 }
 \arguments{

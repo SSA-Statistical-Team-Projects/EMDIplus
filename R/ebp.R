@@ -216,7 +216,9 @@ ebp <- function(fixed,
                 rescale_weights    = TRUE,
                 rescale_popweights = FALSE,
                 lmecontrol_maxiter = 1000,
-                lmecontrol_option  = "optim"
+                lmecontrol_option  = "optim",
+                lmecontrol_returnObject = FALSE, 
+                lmecontrol_tolerance = 1e-6)
 ) {
 
   ebp_check1(fixed = fixed, pop_data = pop_data, pop_domains = pop_domains,
@@ -263,7 +265,9 @@ ebp <- function(fixed,
                               use_lmewgts        = use_lmewgts,
                               use_emdiwgts       = use_emdiwgts,
                               lmecontrol_maxiter = lmecontrol_maxiter,
-                              lmecontrol_option  = lmecontrol_option)
+                              lmecontrol_option  = lmecontrol_option,
+                              lmecontrol_returnObject = lmecontrol_returnObject,
+                              lmecontrol_tolerance = lmecontrol_tolerance)
 
 
   

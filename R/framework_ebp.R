@@ -10,7 +10,7 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
                           threshold, custom_indicator = NULL, na.rm, weights = NULL,
                           pop_weights = NULL, rescale_weights, rescale_popweights,
                           use_lmewgts, use_emdiwgts, lmecontrol_maxiter,
-                          lmecontrol_option) {
+                          lmecontrol_option,lmecontrol_returnObject,lmecontrol_tolerance) {
 
   
   
@@ -214,7 +214,9 @@ framework_ebp <- function(fixed, pop_data, pop_domains, smp_data, smp_domains,
               use_lmewgts        = use_lmewgts,
               use_emdiwgts       = use_emdiwgts,
               lmecontrol_maxiter = lmecontrol_maxiter,
-              lmecontrol_option  = lmecontrol_option)
+              lmecontrol_option  = lmecontrol_option,
+              lmecontrol_returnObject = lmecontrol_returnObject,
+              lmecontrol_tolerance = lmecontrol_tolerance)
          )
 }
 
