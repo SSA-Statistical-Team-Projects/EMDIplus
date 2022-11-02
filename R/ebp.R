@@ -218,7 +218,7 @@ ebp <- function(fixed,
                 lmecontrol_maxiter = 1000,
                 lmecontrol_option  = "optim",
                 lmecontrol_returnObject = FALSE, 
-                lmecontrol_tolerance = 1e-6)
+                lmecontrol_tolerance = 1e-6
 ) {
 
   ebp_check1(fixed = fixed, pop_data = pop_data, pop_domains = pop_domains,
