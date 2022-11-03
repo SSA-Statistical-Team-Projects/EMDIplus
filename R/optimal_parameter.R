@@ -109,7 +109,9 @@ reml <- function(fixed          = fixed,
                                                    returnObject = framework$lmecontrol_returnObject,
                                                    tolerance = framework$lmecontrol_tolerance
                         ),
-                        weights = varFixed(as.formula(paste0("~1/", 
+                        weights = varComb(varIdent(as.formula(paste0("~ 1 | as.factor(", 
+                                                                     framework$smp_domains, ")"))),
+                                          varFixed(as.formula(paste0("~1/", 
                                                                      framework$weights))))
                         
                         ), silent = TRUE)
