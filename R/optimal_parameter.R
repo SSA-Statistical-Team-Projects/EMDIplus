@@ -100,7 +100,18 @@ reml <- function(fixed          = fixed,
                         data      = sd_transformed_data,
                         random    = as.formula(paste0("~ 1 | as.factor(", smp_domains, ")")),
                         method    = "REML",
-                        keep.data = FALSE), silent = TRUE)
+                        keep.data = FALSE,
+                        control = nlme::lmeControl(maxiter = framework$lmecontrol_maxiter,
+                                                   opt     = framework$lmecontrol_option,
+                                                   returnObject = framework$lmecontrol_returnObject,
+                                                   tolerance = framework$lmecontrol_tolerance
+                        ),
+                        weights = varComb(varIdent(as.formula(paste0("~ 1 | as.factor(", 
+                                                                     framework$smp_domains, ")"))),
+                                          varFixed(as.formula(paste0("~1/", 
+                                                                     framework$weights))))
+                        
+                        ), silent = TRUE)
   if(is.null(model_REML)) {
     stop("The likelihood does not converge. One reason could be that the 
           interval for the estimation of an optimal transformation parameter is 
