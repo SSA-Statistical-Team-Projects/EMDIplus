@@ -60,7 +60,8 @@ generic_opt <- function(lambda,
                         fixed,
                         smp_data,
                         smp_domains,
-                        transformation
+                        transformation,
+                        framework
                         ) {
 
 
@@ -71,7 +72,8 @@ generic_opt <- function(lambda,
              smp_data       = smp_data,
              smp_domains    = smp_domains,
              transformation = transformation,
-             lambda         = lambda
+             lambda         = lambda,
+             framework      = framework
              )
         }
       return(optimization)
@@ -86,6 +88,7 @@ reml <- function(fixed          = fixed,
                  smp_domains    = smp_domains,
                  transformation = transformation,
                  lambda         = lambda
+                 framework      = framework
                  ) {
 
   sd_transformed_data <- std_data_transformation(fixed          = fixed,
