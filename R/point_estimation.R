@@ -34,8 +34,7 @@ point_estim <- function (framework,
                                       smp_data       = framework$smp_data,
                                       smp_domains    = framework$smp_domains,
                                       transformation = transformation,
-                                      interval       = interval,
-                                      framework      = framework
+                                      interval       = interval
   )
   
   # Data_transformation function returns transformed data and shift parameter.
