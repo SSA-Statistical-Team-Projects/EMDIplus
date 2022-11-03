@@ -4,7 +4,7 @@ optimal_parameter <- function(generic_opt,
                               smp_data,
                               smp_domains,
                               transformation,
-                              interval,framework) {
+                              interval) {
 
   if(transformation != "no" &&
      transformation != "log" &&
