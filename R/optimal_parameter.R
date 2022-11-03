@@ -87,7 +87,7 @@ reml <- function(fixed          = fixed,
                  smp_data       = smp_data,
                  smp_domains    = smp_domains,
                  transformation = transformation,
-                 lambda         = lambda,
+                 lambda         = lambda
                  framework      = framework
                  ) {
 
