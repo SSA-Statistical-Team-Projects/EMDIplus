@@ -102,17 +102,14 @@ reml <- function(fixed          = fixed,
   try(model_REML <- lme(fixed     = fixed,
                         data      = sd_transformed_data,
                         random    = as.formula(paste0("~ 1 | as.factor(", smp_domains, ")")),
-                        method    = "ML",
+                        method    = "REML",
                         keep.data = FALSE,
                         control = nlme::lmeControl(maxiter = framework$lmecontrol_maxiter,
                                                    opt     = framework$lmecontrol_option,
                                                    returnObject = framework$lmecontrol_returnObject,
                                                    tolerance = framework$lmecontrol_tolerance
                         ),
-                        weights = varComb(varIdent(as.formula(paste0("~ 1 | as.factor(", 
-                                                                     framework$smp_domains, ")"))),
-                                          varFixed(as.formula(paste0("~1/", 
-                                                                     framework$weights))))
+                        weights = varFixed(as.formula(paste0("~1/", framework$weights)))
                         
                         ), silent = TRUE)
   if(is.null(model_REML)) {
