@@ -109,7 +109,8 @@ reml <- function(fixed          = fixed,
                                                    returnObject = framework$lmecontrol_returnObject,
                                                    tolerance = framework$lmecontrol_tolerance
                         ),
-                        weights = varFixed(as.formula(paste0("~1/", framework$weights)))
+                        weights = varFixed(as.formula(paste0("~1/", 
+                                                                     framework$weights))))
                         
                         ), silent = TRUE)
   if(is.null(model_REML)) {
