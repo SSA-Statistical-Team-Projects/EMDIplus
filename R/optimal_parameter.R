@@ -96,11 +96,12 @@ reml <- function(fixed          = fixed,
   
   
   model_REML <- NULL
+  
   try(model_REML <- lme(fixed     = fixed,
                         data      = sd_transformed_data,
                         random    = as.formula(paste0("~ 1 | as.factor(", smp_domains, ")")),
                         method    = "ML",
-                        lmecontrol(returnObject=TRUE,tolerance=1e-4,maxit=1000),
+                        lmeControl(returnObject=TRUE,tolerance=1e-5,maxiter=1000),
                         keep.data = FALSE), silent = FALSE)
   if(is.null(model_REML)) {
     stop("The likelihood does not converge. One reason could be that the 
