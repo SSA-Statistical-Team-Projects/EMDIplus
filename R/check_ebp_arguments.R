@@ -192,7 +192,7 @@ fw_check1 <- function(pop_data, mod_vars, pop_domains, smp_data,
   
   
   if (dim(pop_data)[1] < dim(smp_data)[1]) {
-    stop("The population data set cannot have less observations than the 
+    print("The population data set has less observations than the 
          sample data set.")
   }
   
