@@ -31,9 +31,22 @@ emdi_model <- ebp(fixed = fmla,
                   smp_data = as.data.frame(smp), 
                   smp_domains = "DISTRICT",
                   threshold = 66312.63,
-                  transformation = "ordernorm",
+                  transformation = "log",
                   na.rm = TRUE,
-                  MSE = FALSE,
+                  MSE = TRUE,
                   weights = "weight",
                   pop_weights = "popweight",
-                  only_lmewgts = TRUE)
+                  L = 10,
+                  B = 10)
+
+
+calibmatrix <- create_calibmatrix(smp$REGION)
+
+test_cv <- ebp_compute_cv(ebp_obj = emdi_model,
+                          yvar = "AECONS",
+                          domainvar = "DISTRICT",
+                          weights = "weight",
+                          calibmatrix = calibmatrix,
+                          threshold = 66312.63,
+                          cluster_id = "EAID",
+                          reweights = smp$weight)
