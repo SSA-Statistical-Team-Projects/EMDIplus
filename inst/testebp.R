@@ -40,13 +40,44 @@ emdi_model <- ebp(fixed = fmla,
                   B = 10)
 
 
-calibmatrix <- create_calibmatrix(smp$REGION)
-
 test_cv <- ebp_compute_cv(ebp_obj = emdi_model,
-                          yvar = "AECONS",
+                          welfare = "AECONS",
                           domainvar = "DISTRICT",
-                          weights = "weight",
-                          calibmatrix = calibmatrix,
+                          smp_weights = "weight",
+                          calibvar = "REGION",
                           threshold = 66312.63,
-                          cluster_id = "EAID",
-                          reweights = smp$weight)
+                          smp_data = as.data.frame(smp),
+                          boot_type = "naive")
+
+
+aggregate_saedirect(ebp_object = emdi_model,
+                    smp_data = as.data.frame(smp),
+                    pop_data = as.data.frame(pop),
+                    pop_domains = "DISTRICT",
+                    pop_weights = "weight",
+                    regionvar = "REGION",
+                    indicator = "Head_Count")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

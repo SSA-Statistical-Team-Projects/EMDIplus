@@ -406,29 +406,66 @@ ebp_report_byrank <- function(ebp_object,
   
 }
 
+#' Coefficient of Variation (CV) estimations for Unit EBP Model Headcount Estimates
+#' 
+#' Function \code{ebp_compute_cv} estimates CVs for the headcount of the unit model
+#' EBP functions using three different methods. CV, by definition, is the ratio of
+#' mean square error of the head count to the  head count estimates. Therefore, the 
+#' CV types are distinguished by the method of estimating the mean square. 
+#' 
+#' Method 1 uses the calibrated/naive bootstrapping of the MSE which allows to calibrate 
+#' each bootstrap sample on auxiliary information using the \code{direct} function. 
+#' Calibrated bootstrap improves on the bias of the naive bootstrap when used in the 
+#' complex survey context (see \cite{Rao and Wu (1988)}) for more details.
+#' 
+#' Method 2 employs the Horowitz Thompson variance estimation technique to compute 
+#' MSE i.e. each household is assigned the probability selection within the sample
+#' under a given sampling scheme. The computation employs \code{sae::direct} function.
+#'
+#' Method 3 finally uses the design effect adjusted naive calibrated MSE. The design
+#' effect is estimated using the \code{survey::svydesign} function.  
+#' 
+#' @param ebp_object the EBP object produced from by EMDI from unit model estimation
+#' the object is of class "ebp emdi"
+#' @param smp_data the survey/training data
+#' @param welfare the welfare aggregate variable or outcome variable of interest
+#' @param calibvar the calibration variable to be used in method 1
+#' @param domainvar the target area variable
+#' @param boot_type the bootstrap type "calibrated" or "naive" to be used in method 1
+#' @param designvar the survey design variable to be used in estimating the design 
+#' effect for method 3.
+#' @param smp_weights the weight variable
+#' @param threshold the poverty line or threshold specified
 
+#' @export
 
-ebp_compute_cv <- function(ebp_obj,
-                           yvar,
+ebp_compute_cv <- function(ebp_object,
+                           smp_data,
+                           welfare,
+                           calibvar,
                            domainvar,
+                           boot_type = "calibrated",
                            designvar = NULL,
-                           weights,
-                           calibmatrix,
                            threshold,
-                           cluster_id,
-                           reweights){
+                           smp_weights){
   
   ## ******************** Direct Estimate : Mean and CV ************************
   
+  
   ## computing direct estimate using calibrated bootstrapping (EMDI + LAEKEN) - direct CV1
-  direct_obj <- emdi::direct(y = yvar,
-                             smp_data = ebp_obj$framework$smp_data,
+  #### first prepare the calibration matrix
+  
+  calibmatrix <- create_calibmatrix(smp_data[[calibvar]])
+  
+  
+  direct_obj <- emdi::direct(y = welfare,
+                             smp_data = ebp_object$framework$smp_data,
                              smp_domains = domainvar,
-                             weights = weights,
+                             weights = smp_weights,
                              design = designvar,
                              threshold = threshold,
                              var = TRUE,
-                             boot_type = "calibrate",
+                             boot_type = boot_type,
                              X_calib = calibmatrix,
                              totals = NULL,
                              na.rm = TRUE)
@@ -437,10 +474,10 @@ ebp_compute_cv <- function(ebp_obj,
   
   ## computing direct estimate using the Horowitz Thompson (HT) indicator - direct CV2
   ### first compute poverty rates
-  poor <- as.integer(ebp_obj$framework$smp_data[[yvar]] < threshold)
+  poor <- as.integer(ebp_object$framework$smp_data[[welfare]] < threshold)
   
-  domsize_dt <- as.data.frame(tapply(ebp_obj$model$data[[weights]],
-                                     ebp_obj$model$data[[domainvar]],
+  domsize_dt <- as.data.frame(tapply(ebp_object$model$data[[smp_weights]],
+                                     ebp_object$model$data[[domainvar]],
                                      sum,
                                      na.rm = TRUE))
   
@@ -453,8 +490,8 @@ ebp_compute_cv <- function(ebp_obj,
   
   ### HT estimator CV for direct estimate
   directht_dt <- sae::direct(y = poor,
-                             dom = ebp_obj$model$data[[domainvar]],
-                             sweight = ebp_obj$model$data[[weights]],
+                             dom = ebp_object$model$data[[domainvar]],
+                             sweight = ebp_object$model$data[[smp_weights]],
                              domsize = domsize_dt)
   
   directht_dt$Domain <- direct_obj$ind$Domain
@@ -462,38 +499,37 @@ ebp_compute_cv <- function(ebp_obj,
   #### first estimate naive bootstrap
   #### compute design effect
   #### include psu list into the ebp data object
-  ebp_obj$model$data$cluster_id <- as.factor(cluster_id)
+  ebp_object$model$data$domainvar <- ebp_object$model$data[[domainvar]]
   
-  ebp_obj$model$data$domainvar <- ebp_obj$model$data[[domainvar]]
+  ebp_object$model$data$poor <- as.integer(ebp_object$model$data[[welfare]] > log(threshold))
   
-  ebp_obj$model$data$poor <- as.integer(ebp_obj$model$data[[yvar]] > log(threshold))
-  
-  ebp_obj$model$data$weights <- reweights
+  ebp_object$model$data$weights <- smp_data[[smp_weights]]
   
   ebpobj_svy <- survey::svydesign(ids = ~1,
                                   weights = ~weights,
                                   strata = designvar,
                                   survey.lonely.psu = "adjust",
-                                  data = ebp_obj$model$data)
+                                  data = ebp_object$model$data)
   
   deff_adjust <- survey::svymean(x = ~poor, ebpobj_svy, na = TRUE, deff = TRUE)
   deff_adjust <- attr(deff_adjust, "deff")[1,1]
   
   ### multiple design effect with naive calibration
-  naivevar_dt <- direct(y = yvar,
-                        smp_data = ebp_obj$framework$smp_data,
+  naivevar_dt <- direct(y = welfare,
+                        smp_data = ebp_object$framework$smp_data,
                         smp_domains = domainvar,
                         design = designvar,
-                        weights = weights,
+                        weights = smp_weights,
                         threshold = threshold,
                         var = TRUE)
   
-  naivevar_dt$ind$deff_CV <- sqrt(deff_adjust) * (sqrt(naivevar_dt$MSE$Head_Count) / naivevar_dt$ind$Head_Count)
+  naivevar_dt$ind$deff_CV <- 
+    sqrt(deff_adjust) * (sqrt(naivevar_dt$MSE$Head_Count) / naivevar_dt$ind$Head_Count)
   
   ## ************************ SAE Model Estimates and CV Estimation ****************************
   
   ## compute standard CV using the EMDI package estimator function
-  emdi_dt <- emdi::estimators(object = ebp_obj,
+  emdi_dt <- emdi::estimators(object = ebp_object,
                               indicator = "Head_Count",
                               MSE = FALSE,
                               CV = TRUE)
@@ -534,8 +570,9 @@ ebp_compute_cv <- function(ebp_obj,
                      direct_dt,
                      on = "Domain")
   
-  result_dt <- result_dt[,c("Domain", "Direct_Head_Count", "EBP_Head_Count", "HT_Head_Count_CV",
-                            "CB_Head_Count_CV", "DesignEffect_CV", "EBP_Head_Count_CV")]
+  result_dt <- result_dt[,c("Domain", "Direct_Head_Count", "EBP_Head_Count", 
+                            "HT_Head_Count_CV", "CB_Head_Count_CV", 
+                            "DesignEffect_CV", "EBP_Head_Count_CV")]
   
   
   return(result_dt)
@@ -565,6 +602,189 @@ create_calibmatrix <- function(x){
   return(result)
 
 }
+
+
+
+aggregate_saedirect <- function(ebp_object,
+                                smp_data,
+                                pop_data,
+                                welfare,
+                                smp_domains,
+                                pop_domains,
+                                pop_weights,
+                                pop_regions,
+                                smp_weights,
+                                threshold,
+                                indicator) {
+  
+  
+  #### compute the small area estimates at regionvar level
+  
+  ### include pop_weights and pop_regions in the ebp indicator dataset
+  pop_df <- pop_data[, c(pop_domains, pop_weights)]
+  
+  pop_df <- as.data.frame(tapply(X = pop_df[[pop_weights]],
+                                 INDEX = pop_df[[pop_domains]],
+                                 FUN = sum,
+                                 na.rm = TRUE))
+  
+  colnames(pop_df) <- "pop_weights"
+  
+  pop_df$Domain <- rownames(pop_df)
+  
+  ebp_object$ind <- merge(x = ebp_object$ind,
+                          y = pop_df,
+                          by = "Domain")
+  
+  ebp_object$ind <- merge(x = ebp_object$ind,
+                          y = unique(pop_data[, c(pop_domains, 
+                                                  pop_regions)]),
+                          by.x = "Domain",
+                          by.y = pop_domains)
+  
+  wgt.mean <- function(x, w, na.rm) {
+    
+    y <- sum(w * x, na.rm = na.rm) / sum(w, na.rm = na.rm)
+    
+    return(y)
+    
+  }
+  
+  ### regional SAE computation
+  sae_df <- as.data.frame(tapply(X = ebp_object$ind[[indicator]],
+                                 INDEX = ebp_object$ind[[pop_regions]],
+                                 FUN = wgt.mean,
+                                 w = ebp_object$ind$pop_weights,
+                                 na.rm = TRUE))
+  
+  colnames(sae_df) <- paste0("EBP_", indicator)
+  
+  sae_df[[pop_regions]] <- rownames(sae_df)
+  
+  ### compute direct estimates
+  ebp_object$model$data$poor <- as.integer(ebp_object$model$data[[welfare]] < 
+                                             threshold)
+  
+  ebp_object$model$data <- merge(x = ebp_object$model$data,
+                                 y = unique(pop_data[, c(pop_domains, 
+                                                         pop_regions)]),
+                                 by = pop_domains)
+  
+  direct_df <- as.data.frame(tapply(X = ebp_object$model$data$poor,
+                                    INDEX = ebp_object$model$data[[pop_regions]],
+                                    FUN = wgt.mean,
+                                    w = ebp_object$model$data[[smp_weights]],
+                                    na.rm = TRUE))
+  
+  colnames(direct_df) <- paste0("Direct_", indicator)
+  
+  direct_df[[pop_regions]] <- rownames(direct_df)
+  
+  result_df <- merge(x = sae_df,
+                     y = direct_df,
+                     by = pop_regions)
+  
+  ###### compute the numbers for the sampled areas
+  pop_df <- pop_data[, c(pop_domains, pop_weights)]
+  
+  sampled_doms <- ebp_object$ind$Domain[ebp_object$ind$Domain %in% 
+                                          unique(smp_data[[smp_domains]])] 
+  
+  pop_df <- pop_df[pop_df[[pop_domains]] %in% sampled_doms,]
+  
+  pop_df <- as.data.frame(tapply(X = pop_df[[pop_weights]],
+                                 INDEX = pop_df[[pop_domains]],
+                                 FUN = sum,
+                                 na.rm = TRUE))
+  
+  colnames(pop_df) <- "pop_weights"
+  
+  pop_df$Domain <- rownames(pop_df)
+  
+  ebp_object$ind <- merge(x = ebp_object$ind,
+                          y = pop_df,
+                          by = "Domain")
+  
+  ebp_object$ind <- merge(x = ebp_object$ind,
+                          y = unique(pop_data[, c(pop_domains, 
+                                                  pop_regions)]),
+                          by.x = "Domain",
+                          by.y = pop_domains)
+  
+  wgt.mean <- function(x, w, na.rm) {
+    
+    y <- sum(w * x, na.rm = na.rm) / sum(w, na.rm = na.rm)
+    
+    return(y)
+    
+  }
+  
+  ### regional SAE computation
+  sae_df <- as.data.frame(tapply(X = ebp_object$ind[ebp_object$ind$Domain %in% sampled_doms, 
+                                                    indicator],
+                                 INDEX = ebp_object$ind[ebp_object$ind$Domain %in% sampled_doms,
+                                                        pop_regions],
+                                 FUN = wgt.mean,
+                                 w = ebp_object$ind[ebp_object$ind$Domain %in% sampled_doms, 
+                                                    pop_weights],
+                                 na.rm = TRUE))
+  
+  colnames(sae_df) <- paste0("EBP_", indicator)
+  
+  sae_df[[pop_regions]] <- rownames(sae_df)
+  
+  
+  
+  return(sae_df)
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
