@@ -14,3 +14,4 @@ revdep
 ^\.Rprofile$
 ^CRAN-RELEASE$
 
+^data-raw$

@@ -25,6 +25,11 @@ r2 <- summary(ols)$adj.r.squared #save r-squared to get a sense of a model fit
 #now save formula which can be used later
 fmla <- as.formula(paste("AECONS ~ ", paste(variables, collapse= "+")))
 
+### add district names to the smp and pop data real quick
+
+smp$DNAMES <- paste0("district", smp$DISTRICT)
+pop$DNAMES <- paste0("district", pop$DISTRICT)
+
 emdi_model <- ebp(fixed = fmla, 
                   pop_data = as.data.frame(pop),
                   pop_domains = "DISTRICT", 

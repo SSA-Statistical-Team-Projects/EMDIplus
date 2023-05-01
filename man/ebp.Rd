@@ -30,8 +30,8 @@ ebp(
   rescale_popweights = FALSE,
   lmecontrol_maxiter = 1000,
   lmecontrol_option = "optim",
-  lmecontrol_returnObject = FALSE, 
-  lmecontrol_tolerance = 1e-6 
+  lmecontrol_returnObject = FALSE,
+  lmecontrol_tolerance = 0.000001
 )
 }
 \arguments{
