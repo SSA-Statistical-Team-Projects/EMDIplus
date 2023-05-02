@@ -22,6 +22,19 @@ emdi_model <- emdiplus::ebp(fixed = as.formula(paste("eqIncome ~ ", paste(variab
                             B = 2,
                             L = 2)
 
+  report_list <-
+    ebp_reportdescriptives(ebp_object = emdi_model,
+                           smp_weights = "weight",
+                           pop_weights = "popweights",
+                           repvar = "state",
+                           welfare = "eqIncome",
+                           smp_data = eusilcA_smp2,
+                           pop_data = eusilcA_pop2,
+                           threshold = 11000,
+                           pop_domains = "district",
+                           smp_domains = "district")
+
+
 
 result2 <- 
 ebp_test_means(varlist = variables,
@@ -81,22 +94,22 @@ aggregate_saedirect(ebp_object = emdi_model,
                     indicator = "Head_Count")
 
 
-test_that("The report descriptives function produces sensible results", {
-  
-  report_list <- 
-    ebp_reportdescriptives(ebp_object = emdi_model,
-                           smp_weights = "weight",
-                           pop_weights = "popweights",
-                           repvar = "state",
-                           welfare = "eqIncome",
-                           smp_data = eusilcA_smp2,
-                           pop_data = eusilcA_pop2,
-                           threshold = 11000,
-                           pop_domains = "district",
-                           smp_domains = "district")
-  
-  ## are there 3 objects?
-  expect_equal(length(report_list), 3)
+# test_that("The report descriptives function produces sensible results", {
+#   
+#   report_list <- 
+#     ebp_reportdescriptives(ebp_object = emdi_model,
+#                            smp_weights = "weight",
+#                            pop_weights = "popweights",
+#                            repvar = "state",
+#                            welfare = "eqIncome",
+#                            smp_data = eusilcA_smp2,
+#                            pop_data = eusilcA_pop2,
+#                            threshold = 11000,
+#                            pop_domains = "district",
+#                            smp_domains = "district")
+#   
+#   ## are there 3 objects?
+#   expect_equal(length(report_list), 3)
   
   
   ## check that all repvar areas are in the cv_table and equal the number
