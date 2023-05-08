@@ -31,7 +31,7 @@ ebp(
   lmecontrol_maxiter = 1000,
   lmecontrol_option = "optim",
   lmecontrol_returnObject = FALSE,
-  lmecontrol_tolerance = 0.000001
+  lmecontrol_tolerance = 1e-06
 )
 }
 \arguments{
