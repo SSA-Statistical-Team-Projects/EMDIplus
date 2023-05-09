@@ -51,11 +51,7 @@ direct_variance <- function(direct_estimator,
     B <- as.integer(B[1])
   }
   
-  # separate code for HT estimation 
-  if HT=="TRUE" {
-    browser() 
-  }
-  
+
   
   bootType #<- match.arg(bootType)
   
@@ -79,6 +75,38 @@ direct_variance <- function(direct_estimator,
   smp_data <- data.frame(y = y)
   smp_data$weight <- weights
   smp_data$Domain <- smp_domains
+  
+  # separate code for HT estimation 
+  if (HT == TRUE) {
+    
+    
+    
+    domain_var <- function(df) {
+      tosum <-df[,2]*(df[,2]-1)*df[,1]^2 
+      nrow(df)^-2*sum(tosum)
+    }
+      
+
+    
+  if (indicator_name == "Mean") {
+    smp_data$indicator <- smp_data$y
+  }
+  else if (indicator_name == "Head_Count") {
+  smp_data$indicator <- as.integer(smp_data$y<threshold)
+}
+  else {
+    smp_data$indicator <- NA 
+  }
+ 
+    var <- as.vector(by(data=smp_data[c("indicator","weight")],INDICES=smp_data$Domain,FUN=domain_var))
+    
+    
+    varByDomain <- data.frame(Domain = rs, var = var)
+    indicator$varMethod <- "HT"
+  }
+  
+  else {
+  
   
   # set seed for bootstrap
   if (!is.null(seed)) {
@@ -104,7 +132,6 @@ direct_variance <- function(direct_estimator,
                      envir = envir,
                      indicator_name = indicator_name)
                      #, ...)
-
   # if variance is calculated by domain
   if (byDomain) {
     var <- apply(b$t, 2, var, na.rm = TRUE)
@@ -113,9 +140,11 @@ direct_variance <- function(direct_estimator,
   } else {
     var <- var(b$t[, 1], na.rm = TRUE)
   }
+ 
   
   # preparation of return
   indicator$varMethod <- "bootstrap"
+  } # close HT else loop 
   indicator$var <- var
   if (byDomain) {
     indicator$varByDomain <- varByDomain
