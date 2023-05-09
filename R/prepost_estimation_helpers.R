@@ -593,7 +593,7 @@ ebp_report_byrank <- function(ebp_object,
 #' @param calibvar the calibration variable to be used in method 1
 #' @param domainvar the target area variable
 #' @param boot_type the bootstrap type "calibrated" or "naive" to be used in method 1
-#' @param designvar the survey design variable to be used in estimating the design 
+#' @param design the survey design variable to be used in estimating the design 
 #' effect for method 3.
 #' @param smp_weights the weight variable
 #' @param threshold the poverty line or threshold specified
@@ -703,7 +703,7 @@ ebp_compute_cv <- function(ebp_object,
   
   ebp_object$model$data$weights <- smp_data[[smp_weights]]
   
-  if(is.null(designvar)){
+  if(is.null(design)){
     
     ebpobj_svy <- survey::svydesign(ids = ~1,
                                     weights = ~weights,
@@ -713,11 +713,11 @@ ebp_compute_cv <- function(ebp_object,
     
   } else {
     
-    ebp_object$model$data$designvar <- ebp_object$model$data[[designvar]]
+    ebp_object$model$data$design <- ebp_object$model$data[[design]]
     
     ebpobj_svy <- survey::svydesign(ids = ~1,
                                     weights = ~weights,
-                                    strata = ~designvar,
+                                    strata = ~design,
                                     survey.lonely.psu = "adjust",
                                     data = ebp_object$model$data)
     
@@ -731,7 +731,7 @@ ebp_compute_cv <- function(ebp_object,
   naivevar_dt <- direct(y = welfare,
                         smp_data = ebp_object$framework$smp_data,
                         smp_domains = domainvar,
-                        design = designvar,
+                        design = design,
                         weights = smp_weights,
                         threshold = threshold,
                         var = TRUE)
