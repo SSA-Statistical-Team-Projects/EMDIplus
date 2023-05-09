@@ -73,6 +73,7 @@ ebp_reportdescriptives <- function(ebp_object,
                                    threshold,
                                    pop_domains,
                                    smp_domains,
+                                   design = NULL,
                                    HT = TRUE){
   
   ###get list of variables
@@ -147,7 +148,7 @@ ebp_reportdescriptives <- function(ebp_object,
   naivevar_dt <- direct(y = welfare,
                         smp_data = ebp_object$framework$smp_data,
                         smp_domains = smp_domains,
-                        design = designvar,
+                        design = design,
                         weights = smp_weights,
                         threshold = threshold,
                         var = TRUE)
