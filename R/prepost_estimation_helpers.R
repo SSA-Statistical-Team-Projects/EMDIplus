@@ -23,8 +23,8 @@
 #' @param smp_domains the target area variable within `smp_data`
 #' 
 #' @examples 
-#' data("eusilcA_pop")
-#' data("eusilcA_smp")
+#' data("eusilcA_pop2")
+#' data("eusilcA_smp2")
 #' #### set of variables used in model estimation
 #'variables <- c("gender", "eqsize", "cash", "self_empl",
 #'               "unempl_ben", "age_ben", "surv_ben",
@@ -72,7 +72,8 @@ ebp_reportdescriptives <- function(ebp_object,
                                    pop_data,
                                    threshold,
                                    pop_domains,
-                                   smp_domains){
+                                   smp_domains,
+                                   designvar){
   
   ###get list of variables
   hh_varlist <- colnames(ebp_object$framework$smp_data)
@@ -143,6 +144,17 @@ ebp_reportdescriptives <- function(ebp_object,
   df$CV <- df$MSE_Head_Count / df$Head_Count
   
   ### compute the cvs for census and survey at repvar level
+  naivevar_dt <- direct(y = welfare,
+                        smp_data = ebp_object$framework$smp_data,
+                        smp_domains = smp_domains,
+                        design = designvar,
+                        weights = smp_weights,
+                        threshold = threshold,
+                        var = TRUE)
+  
+  naivevar_dt$ind$Direct_Head_Count_CV <- sqrt(naivevar_dt$MSE$Head_Count) / naivevar_dt$ind$Head_Count
+  
+  
   add_df <- data.frame(unique(df[[repvar]]))
   
   colnames(add_df) <- repvar
@@ -165,13 +177,18 @@ ebp_reportdescriptives <- function(ebp_object,
   df$smp_weights <- df$smp_weights / df$sum_smp_weights
   df$pop_weights <- df$pop_weights / df$sum_pop_weights
   
+  df <- merge(x = df,
+              y = naivevar_dt$ind[, c("Domain", "Direct_Head_Count_CV")],
+              by = "Domain")
+  
+  
   cv_df <-
     data.frame(indicator = paste0("CV for Area: ", unique(df[[repvar]])),
                census = tapply(X = df$CV * df$pop_weights,
                                INDEX = df[[repvar]],
                                FUN = sum,
                                na.rm = TRUE),
-               survey = tapply(X = df$CV * df$smp_weights,
+               survey = tapply(X = df$Direct_Head_Count_CV * df$smp_weights,
                                INDEX = df[[repvar]],
                                FUN = sum,
                                na.rm = TRUE))
@@ -230,8 +247,8 @@ ebp_reportdescriptives <- function(ebp_object,
 #' UNSPECIFIED)
 #' 
 #' @examples 
-#' data("eusilcA_pop")
-#' data("eusilcA_smp")
+#' data("eusilcA_pop2")
+#' data("eusilcA_smp2")
 #' 
 #' #### set of variables used in model estimation
 #'variables <- c("gender", "eqsize", "cash", "self_empl",
@@ -436,8 +453,8 @@ ebp_reportcoef_table <- function(ebp_object,
 #' and if `FALSE` the bottom `number_to_list` will be returned
 #' 
 #' @examples 
-#' data("eusilcA_pop")
-#' data("eusilcA_smp")
+#' data("eusilcA_pop2")
+#' data("eusilcA_smp2")
 #' 
 #' #### set of variables used in model estimation
 #'variables <- c("gender", "eqsize", "cash", "self_empl",
@@ -581,8 +598,8 @@ ebp_report_byrank <- function(ebp_object,
 #' @param threshold the poverty line or threshold specified
 #' 
 #' @examples 
-#' data("eusilcA_pop")
-#' data("eusilcA_smp")
+#' data("eusilcA_pop2")
+#' data("eusilcA_smp2")
 #' 
 #'#### set of variables used in model estimation
 #'variables <- c("gender", "eqsize", "cash", "self_empl",
@@ -822,8 +839,8 @@ create_calibmatrix <- function(x){
 #' aggregated EBP model estimates. Otherwise, all areas are included in estimating the means
 #' 
 #' @examples 
-#' data("eusilcA_pop")
-#' data("eusilcA_smp")
+#' data("eusilcA_pop2")
+#' data("eusilcA_smp2")
 #' 
 #'#### set of variables used in model estimation
 #'variables <- c("gender", "eqsize", "cash", "self_empl",
