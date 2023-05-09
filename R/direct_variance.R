@@ -5,7 +5,8 @@ direct_variance <- function(direct_estimator,
                             smp_data,
                             smp_domains,
                             design,
-                            indicator, 
+                            indicator,
+                            HT, 
                             bootType, 
                             B = B,
                             seed,
@@ -49,6 +50,12 @@ direct_variance <- function(direct_estimator,
   } else {
     B <- as.integer(B[1])
   }
+  
+  # separate code for HT estimation 
+  if HT=="TRUE" {
+    browser() 
+  }
+  
   
   bootType #<- match.arg(bootType)
   
