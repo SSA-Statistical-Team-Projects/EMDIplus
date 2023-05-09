@@ -111,8 +111,7 @@ direct <- function(y,
                    X_calib = NULL, 
                    totals = NULL,
                    custom_indicator = NULL,
-                   na.rm = FALSE,
-                   HT = FALSE){
+                   na.rm = FALSE){
   
   smp_data <- as.data.frame(smp_data)
   
