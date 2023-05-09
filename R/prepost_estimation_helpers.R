@@ -184,11 +184,11 @@ ebp_reportdescriptives <- function(ebp_object,
   
   cv_df <-
     data.frame(indicator = paste0("CV for Area: ", unique(df[[repvar]])),
-               census = tapply(X = df$CV * df$pop_weights,
+               ebp_cv = tapply(X = df$CV * df$pop_weights,
                                INDEX = df[[repvar]],
                                FUN = sum,
                                na.rm = TRUE),
-               survey = tapply(X = df$Direct_Head_Count_CV * df$smp_weights,
+               direct_cv = tapply(X = df$Direct_Head_Count_CV * df$smp_weights,
                                INDEX = df[[repvar]],
                                FUN = sum,
                                na.rm = TRUE))
