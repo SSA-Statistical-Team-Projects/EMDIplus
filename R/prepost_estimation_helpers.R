@@ -217,7 +217,7 @@ ebp_reportdescriptives <- function(ebp_object,
   
   pov_df <-
     data.frame(indicator = c("National Poverty Rate", "National Poverty Line"),
-               census = c(povrate, threshold),
+               model = c(povrate, threshold),
                survey = c(sum(smp_data$poor * smp_data[[smp_weights]]),
                           threshold))
   
