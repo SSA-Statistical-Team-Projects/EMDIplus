@@ -111,9 +111,10 @@ direct <- function(y,
                    X_calib = NULL, 
                    totals = NULL,
                    custom_indicator = NULL,
-                   na.rm = FALSE){
+                   na.rm = FALSE,
+                   HT = FALSE){
   
-  
+  smp_data <- as.data.frame(smp_data)
   
   direct_check(y = y, smp_data = smp_data, smp_domains = smp_domains, 
                 weights = weights, design = design, threshold = threshold, 
