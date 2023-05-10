@@ -190,9 +190,9 @@ ebp_reportdescriptives <- function(ebp_object,
                                FUN = sum,
                                na.rm = TRUE),
                direct_cv = tapply(X = df$Direct_Head_Count_CV * df$smp_weights,
-                               INDEX = df[[repvar]],
-                               FUN = sum,
-                               na.rm = TRUE))
+                                  INDEX = df[[repvar]],
+                                  FUN = sum,
+                                  na.rm = TRUE))
   
   #### ----------------- add other elements of the table ----------------- ####
   ##### compute number of households in census and survey
