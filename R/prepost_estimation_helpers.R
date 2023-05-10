@@ -84,7 +84,7 @@ ebp_reportdescriptives <- function(ebp_object,
   smp_df <- smp_data[complete.cases(smp_data[,hh_varlist]), 
                      c(hh_varlist, repvar, smp_weights)]
   pop_df <- pop_data[complete.cases(pop_data[,pop_varlist]),
-                     c(pop_varlist, repvar, pop_weights)]
+                     c(pop_varlist, repvar, pop_weights,pop_domains)]
   
   
   
