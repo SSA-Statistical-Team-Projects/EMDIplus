@@ -197,14 +197,15 @@ ebp_reportdescriptives <- function(ebp_object,
   #### ----------------- add other elements of the table ----------------- ####
   ##### compute number of households in census and survey
   basic_df <-
-    data.frame(indicator = c("Number of Units", "Number of Regions",
+    data.frame(indicator = c("Number of Units","Number of Regions",
                              "Number of Target Areas"),
-               census = c(round(sum(pop_df[[pop_weights]], na.rm = TRUE)),
+               census = c(length(pop_df[[pop_weights]][is.na(pop_df[[pop_weights]]) == FALSE]), 
                           length(unique(pop_df[[repvar]][is.na(pop_df[[repvar]]) == FALSE])),
                           length(unique(pop_df[[pop_domains]][is.na(pop_df[[smp_domains]]) == FALSE]))),
                survey = c(ebp_object$framework$N_smp,
                           length(unique(smp_df[[repvar]][is.na(smp_df[[repvar]]) == FALSE])),
                           length(unique(smp_df[[smp_domains]][is.na(smp_df[[smp_domains]]) == FALSE]))))
+  #round(sum(pop_df[[pop_weights]], na.rm = TRUE)),
   
   basic_df$census <- as.integer(basic_df$census)
   basic_df$survey <- as.integer(basic_df$survey)
