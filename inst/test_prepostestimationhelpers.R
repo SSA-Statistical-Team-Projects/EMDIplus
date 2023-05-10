@@ -1,6 +1,6 @@
 
-data("eusilcA_pop")
-data("eusilcA_smp")
+data("eusilcA_pop2")
+data("eusilcA_smp2")
 #### set of variables used in model estimation
 variables <- c("gender", "eqsize", "cash", "self_empl",
               "unempl_ben", "age_ben", "surv_ben",
@@ -32,5 +32,4 @@ ebp_reportdescriptives(ebp_object = emdi_model,
                       pop_data = eusilcA_pop2,
                       threshold = 11000,
                       pop_domains = "district",
-                      smp_domains = "district",
-                      designvar = "district")
+                      smp_domains = "district")

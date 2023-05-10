@@ -73,12 +73,13 @@ ebp_reportdescriptives <- function(ebp_object,
                                    threshold,
                                    pop_domains,
                                    smp_domains,
-                                   designvar){
+                                   design = NULL,
+                                   HT = TRUE){
   
   ###get list of variables
   hh_varlist <- colnames(ebp_object$framework$smp_data)
   pop_varlist <- hh_varlist[!(hh_varlist %in% c(welfare, smp_weights))]
-
+  
   ### subset the survey and census data
   smp_df <- smp_data[complete.cases(smp_data[,hh_varlist]), 
                      c(hh_varlist, repvar, smp_weights)]
@@ -122,9 +123,9 @@ ebp_reportdescriptives <- function(ebp_object,
   
   add_df <-
     data.frame(Domain = names(tapply(pop_df[[pop_weights]],
-                                             pop_df[[pop_domains]],
-                                             sum,
-                                             na.rm = TRUE)),
+                                     pop_df[[pop_domains]],
+                                     sum,
+                                     na.rm = TRUE)),
                pop_weights = tapply(pop_df[[pop_weights]],
                                     pop_df[[pop_domains]],
                                     sum,
@@ -147,7 +148,7 @@ ebp_reportdescriptives <- function(ebp_object,
   naivevar_dt <- direct(y = welfare,
                         smp_data = ebp_object$framework$smp_data,
                         smp_domains = smp_domains,
-                        design = designvar,
+                        design = design,
                         weights = smp_weights,
                         threshold = threshold,
                         var = TRUE)
@@ -189,21 +190,22 @@ ebp_reportdescriptives <- function(ebp_object,
                                FUN = sum,
                                na.rm = TRUE),
                direct_cv = tapply(X = df$Direct_Head_Count_CV * df$smp_weights,
-                               INDEX = df[[repvar]],
-                               FUN = sum,
-                               na.rm = TRUE))
+                                  INDEX = df[[repvar]],
+                                  FUN = sum,
+                                  na.rm = TRUE))
   
   #### ----------------- add other elements of the table ----------------- ####
   ##### compute number of households in census and survey
   basic_df <-
-    data.frame(indicator = c("Number of Units", "Number of Regions",
+    data.frame(indicator = c("Number of Units","Number of Regions",
                              "Number of Target Areas"),
-               census = c(round(sum(pop_df[[pop_weights]], na.rm = TRUE)),
+               census = c(length(pop_df[[pop_weights]][is.na(pop_df[[pop_weights]]) == FALSE]), 
                           length(unique(pop_df[[repvar]][is.na(pop_df[[repvar]]) == FALSE])),
                           length(unique(pop_df[[pop_domains]][is.na(pop_df[[smp_domains]]) == FALSE]))),
                survey = c(ebp_object$framework$N_smp,
                           length(unique(smp_df[[repvar]][is.na(smp_df[[repvar]]) == FALSE])),
                           length(unique(smp_df[[smp_domains]][is.na(smp_df[[smp_domains]]) == FALSE]))))
+  #round(sum(pop_df[[pop_weights]], na.rm = TRUE)),
   
   basic_df$census <- as.integer(basic_df$census)
   basic_df$survey <- as.integer(basic_df$survey)
@@ -1133,6 +1135,5 @@ compute_headcount <- function(welfare, threshold){
   return(fgt0)
   
 }
-
 
 

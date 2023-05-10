@@ -104,6 +104,7 @@ direct <- function(y,
                    design = NULL,
                    threshold = NULL,
                    var = FALSE, 
+                   HT = FALSE, 
                    boot_type = "naive", 
                    B = 50,
                    seed = 123,
@@ -112,13 +113,13 @@ direct <- function(y,
                    custom_indicator = NULL,
                    na.rm = FALSE){
   
-  
+  smp_data <- as.data.frame(smp_data)
   
   direct_check(y = y, smp_data = smp_data, smp_domains = smp_domains, 
-                weights = weights, design = design, threshold = threshold, 
-                var = var, boot_type = boot_type, 
-                B = B, seed = seed, X_calib = X_calib, totals = totals, 
-                na.rm = na.rm, custom_indicator = custom_indicator)
+               weights = weights, design = design, threshold = threshold, 
+               var = var, boot_type = boot_type, 
+               B = B, seed = seed, X_calib = X_calib, totals = totals, 
+               na.rm = na.rm, custom_indicator = custom_indicator)
   
   # Save call ------------------------------------------------------------------
   call <- match.call()
@@ -138,16 +139,16 @@ direct <- function(y,
                           direct_estimator =  framework$indicator_list,
                           indicator_name =  framework$indicator_names,
                           MoreArgs = list(
-                                framework = framework,  
-                                boot_type = boot_type, 
-                                B = B,
-                                seed = seed,
-                                X_calib = X_calib, 
-                                totals = totals
+                            framework = framework,  
+                            boot_type = boot_type, 
+                            B = B,
+                            seed = seed,
+                            X_calib = X_calib, 
+                            totals = totals
                           ),
-                  SIMPLIFY = F
+                          SIMPLIFY = F
   )
-
+  
   warnlist <- character()
   if (var == TRUE) {
     envir <- environment()
@@ -156,19 +157,20 @@ direct <- function(y,
                   indicator_name =  framework$indicator_names,
                   indicator = result_point,
                   MoreArgs = list(
-                           y = framework$y, 
-                           weights = framework$weights, 
-                           smp_data = framework$smp_data,  
-                           smp_domains = framework$smp_domains_vec,
-                           design = design,
-                           bootType = boot_type, 
-                           B = B,
-                           seed = seed,
-                           X_calib = X_calib, 
-                           totals = totals,
-                           threshold = framework$threshold,
-                           envir = envir
-                           ),
+                    y = framework$y, 
+                    weights = framework$weights, 
+                    smp_data = framework$smp_data,  
+                    smp_domains = framework$smp_domains_vec,
+                    design = design,
+                    HT = HT, 
+                    bootType = boot_type, 
+                    B = B,
+                    seed = seed,
+                    X_calib = X_calib, 
+                    totals = totals,
+                    threshold = framework$threshold,
+                    envir = envir
+                  ),
                   SIMPLIFY = F
     )
     if (length(warnlist) > 0) {
@@ -184,19 +186,19 @@ direct <- function(y,
   }
   ####### Putting together the emdi object
   
-
+  
   ind <- cbind(res[[1]]$valueByDomain$Domain, 
-              as.data.frame(lapply(res, function(erg){erg$valueByDomain[,2]}))
+               as.data.frame(lapply(res, function(erg){erg$valueByDomain[,2]}))
   )
   if (!var) {
     MSE <- NULL 
     colnames(ind) <- c("Domain", framework$indicator_names)
-    } else {
-      MSE <- cbind(res[[1]]$varByDomain$Domain, 
-              as.data.frame(lapply(res, function(erg){erg$varByDomain[,2]}))
-              )
-      colnames(MSE) <- colnames(ind) <- c("Domain", framework$indicator_names)
-    }
+  } else {
+    MSE <- cbind(res[[1]]$varByDomain$Domain, 
+                 as.data.frame(lapply(res, function(erg){erg$varByDomain[,2]}))
+    )
+    colnames(MSE) <- colnames(ind) <- c("Domain", framework$indicator_names)
+  }
   
   if (length(warnlist) > 0) {
     failed_BS <- do.call(rbind, lapply(strsplit(warnlist, split = ":_:"), t))
@@ -214,28 +216,26 @@ direct <- function(y,
                         ncol = length(framework$indicator_names),
                         dimnames = list(levels(framework$smp_domains_vec), 
                                         framework$indicator_names)
-                        )
+    )
     sucInd <- B - failed_BS
     
   }
   
-   direct_out <- list(
+  direct_out <- list(
     ind = ind, 
     MSE = MSE,
     framework = framework[c("N_dom_smp",
-                         "N_smp",
-                         "smp_domains",
-                         "smp_data",
-                         "smp_domains_vec")],
+                            "N_smp",
+                            "smp_domains",
+                            "smp_data",
+                            "smp_domains_vec")],
     call = call,
     successful_bootstraps = sucInd
-    )
+  )
   
   class(direct_out) <- c( "direct", "emdi")
   return(direct_out)
 }
-
-
 
 
 

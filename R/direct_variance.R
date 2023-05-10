@@ -5,7 +5,8 @@ direct_variance <- function(direct_estimator,
                             smp_data,
                             smp_domains,
                             design,
-                            indicator, 
+                            indicator,
+                            HT, 
                             bootType, 
                             B = B,
                             seed,
@@ -13,7 +14,7 @@ direct_variance <- function(direct_estimator,
                             totals,
                             threshold,
                             envir){
-
+  
   # Domain setup - domains and if variance is calculated by domain
   rs <- indicator$domain
   byDomain <- !is.null(rs)
@@ -50,6 +51,8 @@ direct_variance <- function(direct_estimator,
     B <- as.integer(B[1])
   }
   
+  
+  
   bootType #<- match.arg(bootType)
   
   # if calibrate bootstrap is selected
@@ -73,42 +76,75 @@ direct_variance <- function(direct_estimator,
   smp_data$weight <- weights
   smp_data$Domain <- smp_domains
   
-  # set seed for bootstrap
-  if (!is.null(seed)) {
-    set.seed(seed)
-  } 
-  if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
-    runif(1)
-  seed <- get(".Random.seed")
-  
-  fun <- getFun2(byDomain, direct_estimator)
-  bootFun <- getBootFun2(calibrate, fun)
-  # actual bootstrap
-  
-  b <- clusterBoot2( smp_data, 
-                     bootFun, 
-                     B, 
-                     domain = design, 
-                     #cluster = cluster, 
-                     threshold = threshold, 
-                     aux = X_calib, 
-                     totals = totals, 
-                     rs = rs,
-                     envir = envir,
-                     indicator_name = indicator_name)
-                     #, ...)
-
-  # if variance is calculated by domain
-  if (byDomain) {
-    var <- apply(b$t, 2, var, na.rm = TRUE)
-    varByDomain <- data.frame(Domain = rs, var = var[-1])
-    var <- var[1]
-  } else {
-    var <- var(b$t[, 1], na.rm = TRUE)
+  # separate code for HT estimation 
+  if (HT == TRUE) {
+    
+    
+    
+    domain_var <- function(df) {
+      tosum <-df[,2]*(df[,2]-1)*df[,1]^2 
+      nrow(df)^-2*sum(tosum)
+    }
+    
+    
+    
+    if (indicator_name == "Mean") {
+      smp_data$indicator <- smp_data$y
+    }
+    else if (indicator_name == "Head_Count") {
+      smp_data$indicator <- as.integer(smp_data$y<threshold)
+    }
+    else {
+      smp_data$indicator <- NA 
+    }
+    
+    var <- as.vector(by(data=smp_data[c("indicator","weight")],INDICES=smp_data$Domain,FUN=domain_var))
+    
+    
+    varByDomain <- data.frame(Domain = rs, var = var)
+    indicator$varMethod <- "HT"
   }
   
-  # preparation of return
-  indicator$varMethod <- "bootstrap"
+  else {
+    
+    
+    # set seed for bootstrap
+    if (!is.null(seed)) {
+      set.seed(seed)
+    } 
+    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
+      runif(1)
+    seed <- get(".Random.seed")
+    
+    fun <- getFun2(byDomain, direct_estimator)
+    bootFun <- getBootFun2(calibrate, fun)
+    # actual bootstrap
+    
+    b <- clusterBoot2( smp_data, 
+                       bootFun, 
+                       B, 
+                       domain = design, 
+                       #cluster = cluster, 
+                       threshold = threshold, 
+                       aux = X_calib, 
+                       totals = totals, 
+                       rs = rs,
+                       envir = envir,
+                       indicator_name = indicator_name)
+    #, ...)
+    # if variance is calculated by domain
+    if (byDomain) {
+      var <- apply(b$t, 2, var, na.rm = TRUE)
+      varByDomain <- data.frame(Domain = rs, var = var[-1])
+      var <- var[1]
+    } else {
+      var <- var(b$t[, 1], na.rm = TRUE)
+    }
+    
+    
+    # preparation of return
+    indicator$varMethod <- "bootstrap"
+  } # close HT else loop 
   indicator$var <- var
   if (byDomain) {
     indicator$varByDomain <- varByDomain
